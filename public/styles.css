@@ -1,0 +1,36 @@
+html,
+body {
+    background-color: #131313;
+    color: #fafafa;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 10vh;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+}
+.colour-red {
+    color: red;
+}
+
+.codex-container {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;;
+    text-align: center;
+    width: 100%;
+}
+.codex-title {
+    line-height: 1;
+    padding: 0 0 8px 0;
+    margin: 0 0 8px 0;
+    border-bottom: 4px solid red;
+}
+.codex-enter-button {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font: inherit;
+}
