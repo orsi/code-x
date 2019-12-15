@@ -1,0 +1,11 @@
+{
+  "name": "codex.jonorsi.com",
+  "version": "1.0.0",
+  "description": "Codex",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jonathon Orsi",
+  "license": "ISC"
+}
