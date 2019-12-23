@@ -75,9 +75,16 @@ body {
 }
 
 #codex-container {
+    cursor: default;
     font-size: .25rem;
     text-align: justify;
     text-align-last: justify;
+    /* disable select */
+    user-select: none; /* supported by Chrome and Opera */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
 }
 #codex-container .line::after {
     /* hack for older browsers 
