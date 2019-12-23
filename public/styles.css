@@ -3,10 +3,11 @@ body {
     background-color: #131313;
     color: #fafafa;
     font-family: 'Courier New', Courier, monospace;
-    font-size: 10vh;
+    font-size: 12vmin;
     height: 100%;
-    width: 100%;
+    line-height: 1.25;
     margin: 0;
+    width: 100%;
 }
 .colour-red {
     color: red;
@@ -27,6 +28,31 @@ body {
     visibility: hidden;
 }
 
+
+.current-state {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+.fade-in {
+    opacity: 0;
+    visibility: visible;
+}
+.fading-in {
+    opacity: 1;
+    transition: opacity .2s ease-in;
+}
+.fade-out {
+    opacity: 1;
+    visibility: visible;
+}
+.fading-out {
+    opacity: 0;
+    transition: opacity .2s ease-in;
+}
+
+#screen-title {
+    width: 100%;
+}
 .main-title {
     line-height: 1;
     padding: 0 0 8px 0;
@@ -56,26 +82,5 @@ body {
     width: 100%;	
 }
 .codex-container .letter {
-    transition: opacity .2s ease-in;
-}
-
-.current-state {
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-.fade-in {
-    opacity: 0;
-    visibility: visible;
-}
-.fading-in {
-    opacity: 1;
-    transition: opacity .2s ease-in;
-}
-.fade-out {
-    opacity: 1;
-    visibility: visible;
-}
-.fading-out {
-    opacity: 0;
     transition: opacity .2s ease-in;
 }
