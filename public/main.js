@@ -53,14 +53,15 @@ function onDocumentKeypress(ev) {
         if (ev.charCode >= 65 && ev.charCode <= 90) {
             // upper case letters
             const letter = String.fromCharCode(ev.charCode).toLowerCase();
-            revealLetter(letter);
+            revealLetters(letter);
         } else if (ev.charCode >= 97 && ev.charCode <= 122) {
             // lower case letters
             const letter = String.fromCharCode(ev.charCode);
-            revealLetter(letter);
+            revealLetters(letter);
         } else if (ev.charCode === 32) {
             // space
             transitionToTitleScreen();
+            resetCodex();
         }
     }
 }
@@ -87,7 +88,7 @@ function onDOMContentLoaded() {
     $screenTitle.classList.add('current-state');
 }
 
-function revealLetter (letter) {
+function revealLetters (letter) {
     for (let i = 0; i < codex.length; i++) {
         // line
         const codexLine = codex[i];
@@ -99,6 +100,19 @@ function revealLetter (letter) {
                 codexLetter.element.style.opacity = 1;
                 codexLetter.visible = true;
             }
+        }
+    }
+}
+
+function resetCodex () {
+    for (let i = 0; i < codex.length; i++) {
+        // line
+        const codexLine = codex[i];
+        for (let j = 0; j < codexLine.length; j++) {
+            // letter
+            const codexLetter = codexLine[j];
+            codexLetter.element.style.opacity = 0;
+            codexLetter.visible = false;
         }
     }
 }
