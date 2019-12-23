@@ -55,6 +55,7 @@ body {
 }
 #main-title {
     line-height: 1;
+    font-size: .85rem;
     padding: 0 0 8px 0;
     margin: 0 0 8px 0;
     border-bottom: 4px solid red;
@@ -69,6 +70,8 @@ body {
     color: white;
     cursor: pointer;
     font: inherit;
+    font-size: .85rem;
+    font-weight: 600;
 }
 
 #codex-container {
