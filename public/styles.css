@@ -12,7 +12,7 @@ body {
     color: red;
 }
 
-.codex-container {
+.main-container {
     align-items: center;
     display: flex;
     flex-direction: column;
@@ -21,7 +21,13 @@ body {
     min-width: 100%;
     text-align: center;
 }
-.codex-title {
+.main-container section {
+    position: absolute;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.main-title {
     line-height: 1;
     padding: 0 0 8px 0;
     margin: 0 0 8px 0;
@@ -34,15 +40,12 @@ body {
     cursor: pointer;
     font: inherit;
 }
-.codex-paragraph {
+.codex-container {
     font-size: .25rem;
     text-align: justify;
     text-align-last: justify;
 }
-.codex-paragraph span {
-    display: block;
-}
-.codex-paragraph span::after {
+.codex-container .line::after {
     /* hack for older browsers 
      * text-align: justify doesn't work
      * on single lines, so we need to 'add'
@@ -51,4 +54,28 @@ body {
     content: "";
     display: inline-block;
     width: 100%;	
+}
+.codex-container .letter {
+    transition: opacity .2s ease-in;
+}
+
+.current-state {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+.fade-in {
+    opacity: 0;
+    visibility: visible;
+}
+.fading-in {
+    opacity: 1;
+    transition: opacity .2s ease-in;
+}
+.fade-out {
+    opacity: 1;
+    visibility: visible;
+}
+.fading-out {
+    opacity: 0;
+    transition: opacity .2s ease-in;
 }
