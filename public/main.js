@@ -946,31 +946,31 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "c",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "r",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "o",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "s",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "s",
         "visible": false,
         "element": null
@@ -988,13 +988,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "h",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
@@ -1006,25 +1006,25 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "s",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "u",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "r",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "f",
         "visible": false,
         "element": null
@@ -1078,13 +1078,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "h",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
@@ -1096,31 +1096,31 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "s",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "c",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "r",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
@@ -1164,31 +1164,31 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "i",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "m",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
@@ -1230,31 +1230,31 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "s",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "c",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "t",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "s",
         "visible": false,
         "element": null
@@ -1316,19 +1316,19 @@ const codex = [
     ],
     [
       {
-        "color": "white",
+        "color": "red",
         "letter": "s",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "u",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "m",
         "visible": false,
         "element": null
@@ -1370,25 +1370,25 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "t",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "r",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
@@ -1534,19 +1534,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "l",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "t",
         "visible": false,
         "element": null
@@ -1576,13 +1576,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "t",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "o",
         "visible": false,
         "element": null
@@ -1594,19 +1594,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "l",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "t",
         "visible": false,
         "element": null
@@ -1642,13 +1642,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "h",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
@@ -1672,19 +1672,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "t",
         "visible": false,
         "element": null
@@ -1704,13 +1704,13 @@ const codex = [
     ],
     [
       {
-        "color": "white",
+        "color": "red",
         "letter": "i",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
@@ -1740,19 +1740,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "t",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
@@ -1770,13 +1770,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "i",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "s",
         "visible": false,
         "element": null
@@ -1806,19 +1806,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "p",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "t",
         "visible": false,
         "element": null
@@ -1874,19 +1874,19 @@ const codex = [
     ],
     [
       {
-        "color": "white",
+        "color": "red",
         "letter": "v",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "o",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "w",
         "visible": false,
         "element": null
@@ -1916,13 +1916,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
@@ -1976,25 +1976,25 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "t",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "s",
         "visible": false,
         "element": null
@@ -2018,13 +2018,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "i",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "f",
         "visible": false,
         "element": null
@@ -2062,19 +2062,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "s",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "i",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "t",
         "visible": false,
         "element": null
@@ -2146,31 +2146,31 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "p",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "i",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "g",
         "visible": false,
         "element": null
@@ -2188,31 +2188,31 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "t",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "t",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "i",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "c",
         "visible": false,
         "element": null
@@ -2274,25 +2274,25 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "c",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "m",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
@@ -2346,13 +2346,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "h",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "i",
         "visible": false,
         "element": null
@@ -2394,25 +2394,25 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "d",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "i",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "g",
         "visible": false,
         "element": null
@@ -2430,13 +2430,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "s",
         "visible": false,
         "element": null
@@ -2558,13 +2558,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "o",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
@@ -2588,13 +2588,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "m",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
@@ -2612,13 +2612,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
@@ -2650,37 +2650,37 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "r",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "i",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "v",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "i",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "g",
         "visible": false,
         "element": null
@@ -2704,19 +2704,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "w",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "r",
         "visible": false,
         "element": null
@@ -2740,19 +2740,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "f",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "o",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "r",
         "visible": false,
         "element": null
@@ -2770,13 +2770,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
@@ -2794,13 +2794,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "m",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
@@ -2862,19 +2862,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "o",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "w",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
@@ -2892,19 +2892,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "f",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "t",
         "visible": false,
         "element": null
@@ -2934,19 +2934,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "r",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "i",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "g",
         "visible": false,
         "element": null
@@ -2970,13 +2970,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "h",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
@@ -3020,37 +3020,37 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "c",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "d",
         "visible": false,
         "element": null
@@ -3068,19 +3068,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "h",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
@@ -3098,19 +3098,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "r",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "p",
         "visible": false,
         "element": null
@@ -3146,13 +3146,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "h",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
@@ -3196,19 +3196,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "r",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "p",
         "visible": false,
         "element": null
@@ -3286,19 +3286,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "t",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "h",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
@@ -3316,13 +3316,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "w",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
@@ -3370,25 +3370,25 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "l",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "i",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "g",
         "visible": false,
         "element": null
@@ -3408,19 +3408,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "r",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "t",
         "visible": false,
         "element": null
@@ -3438,19 +3438,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "c",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "r",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "y",
         "visible": false,
         "element": null
@@ -3498,25 +3498,25 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "r",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "o",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "w",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "s",
         "visible": false,
         "element": null
@@ -3572,31 +3572,31 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "l",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "i",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "g",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "h",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "t",
         "visible": false,
         "element": null
@@ -3632,19 +3632,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "r",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "k",
         "visible": false,
         "element": null
@@ -3680,19 +3680,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "g",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
@@ -3742,31 +3742,31 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "r",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "o",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "u",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "g",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "h",
         "visible": false,
         "element": null
@@ -3796,13 +3796,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
@@ -3850,19 +3850,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "g",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "y",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "p",
         "visible": false,
         "element": null
@@ -3910,19 +3910,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "h",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "i",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
@@ -3942,19 +3942,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "l",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "o",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "w",
         "visible": false,
         "element": null
@@ -3990,19 +3990,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "t",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "h",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
@@ -4044,25 +4044,25 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "l",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "u",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "s",
         "visible": false,
         "element": null
@@ -4116,25 +4116,25 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "l",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "i",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "r",
         "visible": false,
         "element": null
@@ -4148,13 +4148,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "o",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "r",
         "visible": false,
         "element": null
@@ -4178,13 +4178,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
@@ -4214,19 +4214,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "g",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
@@ -4250,13 +4250,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "h",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
@@ -4274,19 +4274,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "r",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "o",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "b",
         "visible": false,
         "element": null
@@ -4316,13 +4316,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "h",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
@@ -4336,13 +4336,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "u",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "s",
         "visible": false,
         "element": null
@@ -4402,19 +4402,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "r",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "a",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "g",
         "visible": false,
         "element": null
@@ -4462,31 +4462,31 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "u",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "s",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "i",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "g",
         "visible": false,
         "element": null
@@ -4504,13 +4504,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "h",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
@@ -4554,13 +4554,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "i",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "s",
         "visible": false,
         "element": null
@@ -4650,13 +4650,13 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "i",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "n",
         "visible": false,
         "element": null
@@ -4674,31 +4674,31 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "l",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "u",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "t",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "d",
         "visible": false,
         "element": null
@@ -4712,19 +4712,19 @@ const codex = [
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "o",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "d",
         "visible": false,
         "element": null
       },
       {
-        "color": "white",
+        "color": "red",
         "letter": "e",
         "visible": false,
         "element": null
