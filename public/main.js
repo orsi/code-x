@@ -1,15 +1,16 @@
 const audioFiles = {};
 const resourcePath = '/res/';
 const STATE = {
-    TITLE: 0,
-    CODEX: 1,
-    INFO: 2
+  TITLE: 0,
+  CODEX: 1,
+  INFO: 2
 };
 let $codexContainer;
 let $codexInstructions;
 let $enterButton;
 let $screenTitle;
 let $screenCodex;
+let currentAudio = [];
 let currentState = STATE.TITLE;
 
 /**
@@ -125,16 +126,34 @@ function revealLetters (letter) {
 }
 
 function resetCodex () {
-    for (let i = 0; i < codex.length; i++) {
-        // line
-        const codexLine = codex[i];
-        for (let j = 0; j < codexLine.length; j++) {
-            // letter
-            const codexLetter = codexLine[j];
-            codexLetter.element.style.opacity = 0;
-            codexLetter.visible = false;
+  // reset all visiblity in codex object
+  for (let i = 0; i < codex.length; i++) {
+      // line
+      const codexLine = codex[i];
+      for (let j = 0; j < codexLine.length; j++) {
+          // letter
+          const codexLetter = codexLine[j];
+          codexLetter.element.style.opacity = 0;
+          codexLetter.visible = false;
+      }
+  }
+  // fade out all playing audio and reset
+  for (let i = 0; i < currentAudio.length; i++) {
+    const audio = currentAudio[i];
+    const fadeOutIntervals = {};
+    if (audio.ended === false) {
+      fadeOutIntervals[i] = setInterval(function () {
+        if (audio.volume > 0) {
+          audio.volume -= 0.02;
+      }
+        if (audio.volume <= 0.02) {
+          audio.volume = 0;
+          clearInterval(fadeOutIntervals[i]);
         }
+      }, 50);
     }
+  }
+  currentAudio = [];
 }
 
 function playLetterAudio(letter) {
@@ -143,8 +162,9 @@ function playLetterAudio(letter) {
         return;
     }
     // create new audio so same letter can play multiple time
-    const audio = new Audio($letterAudio.src);
-    audio.play();
+    const clonedAudio = new Audio($letterAudio.src);
+    currentAudio.push(clonedAudio);
+    clonedAudio.play();
 }
 
 function transitionToCodexScreen() {
