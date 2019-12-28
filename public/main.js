@@ -60,7 +60,6 @@ function onDocumentKeypress(ev) {
             revealLetters(letter);
         } else if (ev.charCode === 32) {
             // space
-            transitionToTitleScreen();
             resetCodex();
         }
     }
