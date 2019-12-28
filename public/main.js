@@ -6,6 +6,7 @@ const STATE = {
     INFO: 2
 };
 let $codexContainer;
+let $codexInstructions;
 let $enterButton;
 let $screenTitle;
 let $screenCodex;
@@ -71,6 +72,7 @@ function onDOMContentLoaded() {
     $enterButton = document.querySelector('#enter-button');
     $enterButton.addEventListener('click', onClickEnterButton)
     $codexContainer = document.querySelector('#codex-container');
+    $codexInstructions = document.querySelector('#codex-instructions');
 
     // load audio
     loadAudioFiles();
@@ -88,19 +90,28 @@ function onDOMContentLoaded() {
 }
 
 function revealLetters (letter) {
-    for (let i = 0; i < codex.length; i++) {
-        // line
-        const codexLine = codex[i];
-        for (let j = 0; j < codexLine.length; j++) {
-            // letter
-            const codexLetter = codexLine[j];
-            if (codexLetter.letter === letter && !codexLetter.visible) {
-                playLetterAudio(codexLetter.letter);
-                codexLetter.element.style.opacity = 1;
-                codexLetter.visible = true;
-            }
-        }
-    }
+  // fade out instructions if visible
+  if ($codexInstructions.style.opacity !== '0') {
+    $codexInstructions.style.opacity = '0';
+  }
+
+  let doPlayAudio = false;
+  for (let i = 0; i < codex.length; i++) {
+      // line
+      const codexLine = codex[i];
+      for (let j = 0; j < codexLine.length; j++) {
+          // letter
+          const codexLetter = codexLine[j];
+          if (codexLetter.letter === letter) {
+              doPlayAudio = true;
+              codexLetter.element.style.opacity = 1;
+              codexLetter.visible = true;
+          }
+      }
+  }
+  if (doPlayAudio) {
+    playLetterAudio(letter);
+  }
 }
 
 function resetCodex () {
@@ -117,11 +128,13 @@ function resetCodex () {
 }
 
 function playLetterAudio(letter) {
-    const letterAudio = audioFiles[letter];
-    if (letterAudio === undefined) {
+    const $letterAudio = audioFiles[letter];
+    if ($letterAudio === undefined) {
         return;
     }
-    letterAudio.play();
+    // create new audio so same letter can play multiple time
+    const audio = new Audio($letterAudio.src);
+    audio.play();
 }
 
 function transitionToCodexScreen() {

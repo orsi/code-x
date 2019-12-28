@@ -97,3 +97,13 @@ body {
 #codex-container .letter {
     transition: opacity 3s ease-in;
 }
+#codex-instructions {
+    bottom: 0;
+    font-size: 16px;
+    left: 0;
+    padding: 16px;
+    position: absolute;
+    right: 0;
+    text-align: center;
+    transition: opacity .5s ease-in-out;
+}
