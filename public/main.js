@@ -49,21 +49,31 @@ function onClickEnterButton(ev) {
     transitionToCodexScreen();
 }
 
-function onDocumentKeypress(ev) {
-    if (currentState === STATE.CODEX) {
-        if (ev.charCode >= 65 && ev.charCode <= 90) {
-            // upper case letters
-            const letter = String.fromCharCode(ev.charCode).toLowerCase();
-            revealLetters(letter);
-        } else if (ev.charCode >= 97 && ev.charCode <= 122) {
-            // lower case letters
-            const letter = String.fromCharCode(ev.charCode);
-            revealLetters(letter);
-        } else if (ev.charCode === 32) {
-            // space
-            resetCodex();
-        }
-    }
+function onDocumentKeydown(ev) {
+  // get character code depending on browser compatibility
+  let keyCode;
+  if (ev.which || ev.keyCode || ev.charCode) {
+      keyCode = ev.which || ev.keyCode || ev.charCode;
+  }
+
+  if (currentState === STATE.CODEX) {
+      if (keyCode >= 65 && keyCode <= 90) {
+          // upper case letters
+          const letter = String.fromCharCode(keyCode).toLowerCase();
+          revealLetters(letter);
+      } else if (keyCode >= 97 && keyCode <= 122) {
+          // lower case letters
+          const letter = String.fromCharCode(keyCode);
+          revealLetters(letter);
+      } else if (keyCode === 32) {
+          // space
+          resetCodex();
+      } else if (keyCode === 27) {
+        // escape
+        transitionToTitleScreen();
+        resetCodex();
+      }
+  }
 }
 
 function onDOMContentLoaded() {
@@ -159,7 +169,7 @@ function transitionToTitleScreen() {
 
 // setup events
 document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
-document.addEventListener('keypress', onDocumentKeypress);
+document.addEventListener('keydown', onDocumentKeydown);
 
 
 /** MAIN CODEX META OBJECT */
