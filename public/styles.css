@@ -99,9 +99,8 @@ body {
 }
 #codex-instructions {
     bottom: 0;
-    font-size: 16px;
+    font-size: .2rem;
     left: 0;
-    padding: 16px;
     position: absolute;
     right: 0;
     text-align: center;
