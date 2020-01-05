@@ -1,10 +1,18 @@
 const AUDIO_FILES = {};
+const FADEOUT_LETTERS_INTERVALS = {};
+const MAX_FADEOUT_LETTER_TIME = 8000;
+const MIN_FADEOUT_LETTER_TIME = 5000;
+const MAX_NEXT_UPDATE_AUTO_TIME = 5000;
+const MIN_NEXT_UPDATE_AUTO_TIME = 2000;
 const RESOURCE_PATH = '/res/';
 const STATE = {
   TITLE: 0,
-  CODEX: 1,
-  INFO: 2
+  INTERACTIVE: 1,
+  AUTO: 2,
+  INFO: 3
 };
+const TIME_TIL_AUTO = 15000;
+const TIME_TIL_FADEOUT_LETTER = 5000;
 let $codexContainer;
 let $codexInstructions;
 let $enterButton;
@@ -12,7 +20,43 @@ let $screenTitle;
 let $screenCodex;
 let currentAudio = [];
 let currentState = STATE.TITLE;
+let lastKeypressTime;
+let lastUpdateTime;
+let lastUpdateAutoTime;
+let nextUpdateAutoTime;
 
+
+function hideLetter(letter) {
+  // reset letter in codex object
+  for (let i = 0; i < codex.length; i++) {
+    // line
+    const codexLine = codex[i];
+    for (let j = 0; j < codexLine.length; j++) {
+        // letter
+        const codexLetter = codexLine[j];
+        if (codexLetter.letter === letter) {
+          codexLetter.element.style.opacity = 0;
+          codexLetter.visible = false;
+        }
+    }
+  }
+}
+
+function getFadeoutLetterTime() {
+  const nextTime = Math.floor(
+    Math.random() * (MAX_FADEOUT_LETTER_TIME - MIN_FADEOUT_LETTER_TIME)
+  ) + MIN_FADEOUT_LETTER_TIME;
+  console.log('next fadeout time', nextTime);
+  return nextTime;
+}
+
+function getNextUpdateAutoTime() {
+  const nextTime = Math.floor(
+    Math.random() * (MAX_NEXT_UPDATE_AUTO_TIME - MIN_NEXT_UPDATE_AUTO_TIME)
+  ) + MIN_NEXT_UPDATE_AUTO_TIME;
+  console.log('next auto time', nextTime);
+  return nextTime;
+}
 
 /**
  * Generates the html for the main Codex paragraph within
@@ -48,7 +92,7 @@ function loadAudioFiles() {
 }
 
 function onClickEnterButton(ev) {
-    transitionToCodexScreen();
+    transitionToInteractiveScreen();
 }
 
 function onDocumentKeydown(ev) {
@@ -58,15 +102,15 @@ function onDocumentKeydown(ev) {
       keyCode = ev.which || ev.keyCode || ev.charCode;
   }
 
-  if (currentState === STATE.CODEX) {
+  if (currentState === STATE.INTERACTIVE) {
       if (keyCode >= 65 && keyCode <= 90) {
           // upper case letters
           const letter = String.fromCharCode(keyCode).toLowerCase();
-          revealLetters(letter);
+          revealLetter(letter);
       } else if (keyCode >= 97 && keyCode <= 122) {
           // lower case letters
           const letter = String.fromCharCode(keyCode);
-          revealLetters(letter);
+          revealLetter(letter);
       } else if (keyCode === 32) {
           // space
           resetCodex();
@@ -75,6 +119,20 @@ function onDocumentKeydown(ev) {
         transitionToTitleScreen();
         resetCodex();
       }
+  } else if (currentState === STATE.AUTO) {
+      if ((keyCode >= 65 && keyCode <= 90) ||
+        (keyCode >= 97 && keyCode <= 122) ||
+        keyCode === 32
+      ) {
+        // upper case letters
+        transitionToInteractiveScreen();
+        resetCodex();
+      } else if (keyCode === 27) {
+        // escape
+        transitionToTitleScreen();
+        resetCodex();
+      }
+      nextUpdateAutoTime = 0;
   }
 }
 
@@ -101,7 +159,7 @@ function onDOMContentLoaded() {
     $screenTitle.classList.add('current-state');
 }
 
-function revealLetters (letter) {
+function revealLetter (letter) {
   // fade out instructions if visible
   if ($codexInstructions.style.opacity !== '0') {
     $codexInstructions.style.opacity = '0';
@@ -138,6 +196,7 @@ function resetCodex () {
           codexLetter.visible = false;
       }
   }
+
   // fade out all playing audio and reset
   for (let i = 0; i < currentAudio.length; i++) {
     const audio = currentAudio[i];
@@ -168,24 +227,75 @@ function playLetterAudio(letter) {
     clonedAudio.play();
 }
 
-function transitionToCodexScreen() {
+function transitionToAutoScreen() {
+  currentState = STATE.AUTO;
+  lastUpdateAutoTime = new Date().getTime();
+  nextUpdateAutoTime = 0;
+}
+
+function transitionToInteractiveScreen() {
+  currentState = STATE.INTERACTIVE;
     $screenTitle.classList.add('fade-out');
     $screenTitle.classList.add('fading-out');
     $screenTitle.classList.remove('current-state');
     $screenCodex.classList.add('fade-in');
     $screenCodex.classList.add('fading-in');
     $screenCodex.classList.add('current-state');
-    currentState = STATE.CODEX;
+
+    lastUpdateTime = lastKeypressTime = new Date().getTime();
+    update();
 }
 
 function transitionToTitleScreen() {
+  currentState = STATE.TITLE;
     $screenCodex.classList.add('fade-out');
     $screenCodex.classList.add('fading-out');
     $screenCodex.classList.remove('current-state');
     $screenTitle.classList.add('fade-in');
     $screenTitle.classList.add('fading-in');
     $screenTitle.classList.add('current-state');
-    currentState = STATE.TITLE;
+}
+
+function update() {
+  const now = new Date().getTime();
+  const delta = now - lastUpdateTime;
+  lastUpdateTime = now;
+
+  // switch to auto state when a key hasn't been pressed
+  // in 10 seconds
+  if (currentState === STATE.INTERACTIVE && 
+    now - lastKeypressTime > TIME_TIL_AUTO
+  ) {
+    transitionToAutoScreen();
+  }
+
+  if (currentState === STATE.AUTO && 
+    lastUpdateTime - lastUpdateAutoTime > nextUpdateAutoTime
+  ) {
+    updateAuto();
+    lastUpdateAutoTime = now;
+  }
+
+  // if we're still in interactive or auto mode, keepp updating
+  if (currentState === STATE.INTERACTIVE || currentState === STATE.AUTO) {
+    requestAnimationFrame(update);
+  }
+}
+
+function updateAuto() {
+  // pick a random letter and reveal
+  // key codes between 65 and 90 are upper case
+  const keyCode = Math.floor(Math.random() * 25) + 65;
+  const letter = String.fromCharCode(keyCode).toLowerCase();
+  revealLetter(letter);
+
+  // fade out letter
+  setTimeout(function () {
+    hideLetter(letter);
+  }, getFadeoutLetterTime());
+
+  // randomly reveal a letter every 2-6 seconds
+  nextUpdateAutoTime = getNextUpdateAutoTime();
 }
 
 // setup events
