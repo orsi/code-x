@@ -3,7 +3,7 @@ const FADEOUT_LETTERS_INTERVALS = {};
 const MAX_FADEOUT_LETTER_TIME = 8000;
 const MIN_FADEOUT_LETTER_TIME = 5000;
 const MAX_NEXT_UPDATE_AUTO_TIME = 5000;
-const MIN_NEXT_UPDATE_AUTO_TIME = 2000;
+const MIN_NEXT_UPDATE_AUTO_TIME = 1000;
 const RESOURCE_PATH = '/res/';
 const STATE = {
   TITLE: 0,
@@ -46,15 +46,22 @@ function getFadeoutLetterTime() {
   const nextTime = Math.floor(
     Math.random() * (MAX_FADEOUT_LETTER_TIME - MIN_FADEOUT_LETTER_TIME)
   ) + MIN_FADEOUT_LETTER_TIME;
-  console.log('next fadeout time', nextTime);
   return nextTime;
+}
+
+/**
+ * Returns a random key code between 65 and 90 for all
+ * uppercase letters.
+ */
+function getRandomKeyCode() {
+  const keyCode = Math.floor(Math.random() * 26) + 65
+  return keyCode;
 }
 
 function getNextUpdateAutoTime() {
   const nextTime = Math.floor(
     Math.random() * (MAX_NEXT_UPDATE_AUTO_TIME - MIN_NEXT_UPDATE_AUTO_TIME)
   ) + MIN_NEXT_UPDATE_AUTO_TIME;
-  console.log('next auto time', nextTime);
   return nextTime;
 }
 
@@ -96,6 +103,8 @@ function onClickEnterButton(ev) {
 }
 
 function onDocumentKeydown(ev) {
+  lastKeypressTime = new Date().getTime();
+
   // get character code depending on browser compatibility
   let keyCode;
   if (ev.which || ev.keyCode || ev.charCode) {
@@ -120,11 +129,22 @@ function onDocumentKeydown(ev) {
         resetCodex();
       }
   } else if (currentState === STATE.AUTO) {
-      if ((keyCode >= 65 && keyCode <= 90) ||
-        (keyCode >= 97 && keyCode <= 122) ||
-        keyCode === 32
-      ) {
+      if (keyCode >= 65 && keyCode <= 90) {
         // upper case letters
+        transitionToInteractiveScreen();
+        resetCodex();
+
+        const letter = String.fromCharCode(keyCode).toLowerCase();
+        revealLetter(letter);
+      } else if (keyCode >= 97 && keyCode <= 122) {
+        // lower case letters
+        transitionToInteractiveScreen();
+        resetCodex();
+
+        const letter = String.fromCharCode(keyCode);
+        revealLetter(letter);
+      } else if (keyCode === 32) {
+        // space
         transitionToInteractiveScreen();
         resetCodex();
       } else if (keyCode === 27) {
@@ -231,6 +251,7 @@ function transitionToAutoScreen() {
   currentState = STATE.AUTO;
   lastUpdateAutoTime = new Date().getTime();
   nextUpdateAutoTime = 0;
+  resetCodex();
 }
 
 function transitionToInteractiveScreen() {
@@ -276,16 +297,14 @@ function update() {
     lastUpdateAutoTime = now;
   }
 
-  // if we're still in interactive or auto mode, keepp updating
+  // if we're still in interactive or auto mode, keep updating
   if (currentState === STATE.INTERACTIVE || currentState === STATE.AUTO) {
     requestAnimationFrame(update);
   }
 }
 
 function updateAuto() {
-  // pick a random letter and reveal
-  // key codes between 65 and 90 are upper case
-  const keyCode = Math.floor(Math.random() * 25) + 65;
+  const keyCode = getRandomKeyCode();
   const letter = String.fromCharCode(keyCode).toLowerCase();
   revealLetter(letter);
 
@@ -301,7 +320,6 @@ function updateAuto() {
 // setup events
 document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
 document.addEventListener('keydown', onDocumentKeydown);
-
 
 /** MAIN CODEX META OBJECT */
 const codex = [
