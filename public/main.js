@@ -1,5 +1,5 @@
-const audioFiles = {};
-const resourcePath = '/res/';
+const AUDIO_FILES = {};
+const RESOURCE_PATH = '/res/';
 const STATE = {
   TITLE: 0,
   CODEX: 1,
@@ -12,6 +12,7 @@ let $screenTitle;
 let $screenCodex;
 let currentAudio = [];
 let currentState = STATE.TITLE;
+
 
 /**
  * Generates the html for the main Codex paragraph within
@@ -42,7 +43,7 @@ function generateCodexHtml(container) {
 function loadAudioFiles() {
     for (i = 0; i < 26; i++) {
         const letter = String.fromCharCode(97 + i);
-        audioFiles[letter] = new Audio(`${resourcePath}${letter.toUpperCase()}.mp3`);
+        AUDIO_FILES[letter] = new Audio(`${RESOURCE_PATH}${letter.toUpperCase()}.mp3`);
     }
 }
 
@@ -157,7 +158,7 @@ function resetCodex () {
 }
 
 function playLetterAudio(letter) {
-    const $letterAudio = audioFiles[letter];
+    const $letterAudio = AUDIO_FILES[letter];
     if ($letterAudio === undefined) {
         return;
     }
