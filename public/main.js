@@ -28,6 +28,7 @@ let $volumeButton;
 let currentAudio = [];
 let currentState;
 let isAudioMuted = false;
+let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 let lastKeypressTime;
 let lastUpdateTime;
 let lastUpdateAutoTime;
@@ -135,7 +136,11 @@ function loadAudioFiles() {
 }
 
 function onClickEnterButton(ev) {
-  transitionToInteractiveScreen();
+  if (isMobile) {
+    transitionToAutoScreen();
+  } else {
+    transitionToInteractiveScreen();
+  }
 }
 
 function onClickInfoButton(ev) {
@@ -143,7 +148,11 @@ function onClickInfoButton(ev) {
 }
 
 function onClickInfoExitButton(ev) {
-  transitionToInteractiveScreen();
+  if (isMobile) {
+    transitionToAutoScreen();
+  } else {
+    transitionToInteractiveScreen();
+  }
 }
 
 function onClickVolumeButton(ev) {
@@ -372,14 +381,12 @@ function setCurrentState(state, $element) {
 
 function transitionToAutoScreen() {
   setCurrentState(STATE.AUTO, $screenCodex);
-  // fade out instructions if last state
-  // was INTERACTIVE
-  if (previousState === STATE.INTERACTIVE) {
-    fadeOutElement($codexInstructions);
-  }
+  // fade out instructions
+  fadeOutElement($codexInstructions);
   lastUpdateAutoTime = new Date().getTime();
   nextUpdateAutoTime = 0;
   fadeGain(1, .5);
+  update();
 }
 
 function transitionToInfoScreen() {
