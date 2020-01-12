@@ -4,7 +4,7 @@ const AUDIO_FILES = {};
 const FADEOUT_LETTERS_INTERVALS = {};
 const MAX_FADEOUT_LETTER_TIME = 8000;
 const MIN_FADEOUT_LETTER_TIME = 5000;
-const MAX_NEXT_UPDATE_AUTO_TIME = 5000;
+const MAX_NEXT_UPDATE_AUTO_TIME = 4000;
 const MIN_NEXT_UPDATE_AUTO_TIME = 1000;
 const RESOURCE_PATH = '/res/';
 const STATE = {
@@ -13,15 +13,21 @@ const STATE = {
   AUTO: 2,
   INFO: 3
 };
+const SCREENS = [];
 const TIME_TIL_AUTO = 10000;
 const TIME_TIL_FADEOUT_LETTER = 5000;
 let $codexContainer;
 let $codexInstructions;
 let $enterButton;
+let $infoButton;
+let $infoExitButton;
 let $screenTitle;
 let $screenCodex;
+let $screenInfo;
+let $volumeButton;
 let currentAudio = [];
 let currentState = STATE.TITLE;
+let isAudioMuted = false;
 let lastKeypressTime;
 let lastUpdateTime;
 let lastUpdateAutoTime;
@@ -43,6 +49,23 @@ function hideLetter(letter) {
         }
     }
   }
+}
+
+function fadeInScreen(screen) {
+  screen.classList.add('fade-in');
+  screen.classList.add('fading-in');
+  screen.classList.add('current-state');
+}
+
+function fadeOutAllScreens() {
+  for (let i = 0; i < SCREENS.length; i++) {
+    fadeOutScreen(SCREENS[i]);
+  }
+}
+function fadeOutScreen(screen) {
+  screen.classList.add('fade-out');
+  screen.classList.add('fading-out');
+  screen.classList.remove('current-state');
 }
 
 function getFadeoutLetterTime() {
@@ -102,7 +125,25 @@ function loadAudioFiles() {
 }
 
 function onClickEnterButton(ev) {
-    transitionToInteractiveScreen();
+  transitionToInteractiveScreen();
+}
+
+function onClickInfoButton(ev) {
+  transitionToInfoScreen();
+}
+
+function onClickInfoExitButton(ev) {
+  transitionToInteractiveScreen();
+}
+
+function onClickVolumeButton(ev) {
+  if (isAudioMuted) {
+    AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(1, AUDIO_CONTEXT.currentTime + 2);
+    isAudioMuted = false;
+  } else {
+    AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(0, AUDIO_CONTEXT.currentTime);
+    isAudioMuted = true;
+  }
 }
 
 function onDocumentKeydown(ev) {
@@ -160,26 +201,37 @@ function onDocumentKeydown(ev) {
 }
 
 function onDOMContentLoaded() {
-    $screenTitle = document.querySelector('#screen-title');
-    $screenCodex = document.querySelector('#screen-codex');
-    $enterButton = document.querySelector('#enter-button');
-    $enterButton.addEventListener('click', onClickEnterButton)
-    $codexContainer = document.querySelector('#codex-container');
-    $codexInstructions = document.querySelector('#codex-instructions');
+  // select elements
+  $codexContainer = document.querySelector('#codex-container');
+  $codexInstructions = document.querySelector('#codex-instructions');
+  $enterButton = document.querySelector('#enter-button');
+  $infoButton = document.querySelector('#codex-info-button');
+  $infoExitButton = document.querySelector('#info-exit-button');
+  $screenTitle = document.querySelector('#screen-title');
+  $screenCodex = document.querySelector('#screen-codex');
+  $screenInfo = document.querySelector('#screen-info');
+  $volumeButton = document.querySelector('#codex-volume-button');
 
-    // load audio
-    loadAudioFiles();
+  SCREENS.push($screenTitle);
+  SCREENS.push($screenCodex);
+  SCREENS.push($screenInfo);
 
-    // generate codex
-    generateCodexHtml($codexContainer);
+  // setup events
+  document.addEventListener('keydown', onDocumentKeydown);
+  document.addEventListener('mousemove', onMouseMove);
+  $enterButton.addEventListener('click', onClickEnterButton);
+  $infoButton.addEventListener('click', onClickInfoButton);
+  $infoExitButton.addEventListener('click', onClickInfoExitButton);
+  $volumeButton.addEventListener('click', onClickVolumeButton);
 
-    // initialize title screen
-    $screenCodex.classList.add('fade-out');
-    $screenCodex.classList.add('fading-out');
-    $screenCodex.classList.remove('current-state');
-    $screenTitle.classList.add('fade-in');
-    $screenTitle.classList.add('fading-in');
-    $screenTitle.classList.add('current-state');
+  // load audio
+  loadAudioFiles();
+
+  // generate codex
+  generateCodexHtml($codexContainer);
+
+  // initialize title screen
+  transitionToTitleScreen();
 }
 
 function onMouseMove(ev) {
@@ -285,28 +337,27 @@ function transitionToAutoScreen() {
   AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(1, AUDIO_CONTEXT.currentTime + 3);
 }
 
+function transitionToInfoScreen() {
+  currentState = STATE.INFO;
+  fadeOutAllScreens();
+  fadeInScreen($screenInfo);
+  resetCodex();
+}
+
 function transitionToInteractiveScreen() {
   currentState = STATE.INTERACTIVE;
-    $screenTitle.classList.add('fade-out');
-    $screenTitle.classList.add('fading-out');
-    $screenTitle.classList.remove('current-state');
-    $screenCodex.classList.add('fade-in');
-    $screenCodex.classList.add('fading-in');
-    $screenCodex.classList.add('current-state');
-
-    lastUpdateTime = lastKeypressTime = new Date().getTime();
-    AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(1, AUDIO_CONTEXT.currentTime + 3);
-    update();
+  fadeOutAllScreens();
+  fadeInScreen($screenCodex);
+  lastUpdateTime = lastKeypressTime = new Date().getTime();
+  AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(1, AUDIO_CONTEXT.currentTime + 3);
+  update();
 }
 
 function transitionToTitleScreen() {
   currentState = STATE.TITLE;
-    $screenCodex.classList.add('fade-out');
-    $screenCodex.classList.add('fading-out');
-    $screenCodex.classList.remove('current-state');
-    $screenTitle.classList.add('fade-in');
-    $screenTitle.classList.add('fading-in');
-    $screenTitle.classList.add('current-state');
+  fadeOutAllScreens();
+  fadeInScreen($screenTitle);
+  resetCodex();
 }
 
 function update() {
@@ -349,10 +400,8 @@ function updateAuto() {
   nextUpdateAutoTime = getNextUpdateAutoTime();
 }
 
-// setup events
+// on load
 document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
-document.addEventListener('keydown', onDocumentKeydown);
-document.addEventListener('mousemove', onMouseMove);
 
 /** MAIN CODEX META OBJECT */
 const codex = [

@@ -16,18 +16,21 @@ body {
     min-height: 100vh;
     min-width: 100vw;
 }
-.main-container section {
+.center {
     left: 50%;
-    opacity: 0;
     position: absolute;
     text-align: center;
     top: 50%;
     transform: translate(-50%, -50%);
+}
+.d-none {
+    display: none;
     visibility: hidden;
 }
 
 
 .current-state {
+    display: block;
     opacity: 1 !important;
     visibility: visible !important;
 }
@@ -98,11 +101,28 @@ body {
     transition: opacity 3s ease-in;
 }
 #codex-instructions {
-    bottom: 0;
     font-size: .2rem;
-    left: 0;
-    position: absolute;
-    right: 0;
     text-align: center;
     transition: opacity .5s ease-in-out;
+}
+#codex-toolbar {
+}
+
+#screen-info {
+    box-sizing: border-box;
+    font-size: 16px;
+    margin: 0 auto;
+    max-height: 100vh;
+    max-width: 560px;
+    padding: 16px;
+    position: relative;
+    text-align: left;
+    overflow: auto;
+}
+
+#info-exit-button {
+    position: sticky;
+    top: 16px;
+    float: right;
+    margin: 8px;
 }
