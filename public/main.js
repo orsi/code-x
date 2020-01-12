@@ -29,6 +29,7 @@ let currentAudio = [];
 let currentState;
 let isAudioMuted = false;
 let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+let isMobileTouched = false;
 let lastKeypressTime;
 let lastUpdateTime;
 let lastUpdateAutoTime;
@@ -137,6 +138,7 @@ function loadAudioFiles() {
 
 function onClickEnterButton(ev) {
   if (isMobile) {
+    onClickVolumeButton();
     transitionToAutoScreen();
   } else {
     transitionToInteractiveScreen();
@@ -156,6 +158,15 @@ function onClickInfoExitButton(ev) {
 }
 
 function onClickVolumeButton(ev) {
+  // make audio work on mobile
+  if (isMobile && !isMobileTouched) {
+    let source = AUDIO_CONTEXT.createBufferSource();
+    source.connect(AUDIO_CONTEXT.destination);
+    source.start(0);
+    source.disconnect();
+    isMobileTouched = true;
+  }
+
   if (isAudioMuted) {
     fadeGain(1, .5);
     isAudioMuted = false;
@@ -260,6 +271,7 @@ function onDOMContentLoaded() {
   $infoButton.addEventListener('click', onClickInfoButton);
   $infoExitButton.addEventListener('click', onClickInfoExitButton);
   $volumeButton.addEventListener('click', onClickVolumeButton);
+  $volumeButton.addEventListener('touchstart', onClickVolumeButton);
 
   // connect gain to audio context
   AUDIO_GAIN_NODE.connect(AUDIO_CONTEXT.destination);
@@ -385,7 +397,6 @@ function transitionToAutoScreen() {
   fadeOutElement($codexInstructions);
   lastUpdateAutoTime = new Date().getTime();
   nextUpdateAutoTime = 0;
-  fadeGain(1, .5);
   update();
 }
 
@@ -401,7 +412,6 @@ function transitionToInteractiveScreen() {
     fadeInElement($codexInstructions);
   }
   lastUpdateTime = lastKeypressTime = new Date().getTime();
-  fadeGain(1, .5);
   update();
 }
 
