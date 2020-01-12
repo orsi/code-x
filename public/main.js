@@ -1,3 +1,5 @@
+const AUDIO_CONTEXT = new (window.AudioContext || window.webkitAudioContext)();
+const AUDIO_GAIN_NODE = AUDIO_CONTEXT.createGain();
 const AUDIO_FILES = {};
 const FADEOUT_LETTERS_INTERVALS = {};
 const MAX_FADEOUT_LETTER_TIME = 8000;
@@ -11,7 +13,7 @@ const STATE = {
   AUTO: 2,
   INFO: 3
 };
-const TIME_TIL_AUTO = 15000;
+const TIME_TIL_AUTO = 10000;
 const TIME_TIL_FADEOUT_LETTER = 5000;
 let $codexContainer;
 let $codexInstructions;
@@ -25,6 +27,7 @@ let lastUpdateTime;
 let lastUpdateAutoTime;
 let nextUpdateAutoTime;
 
+AUDIO_GAIN_NODE.connect(AUDIO_CONTEXT.destination);
 
 function hideLetter(letter) {
   // reset letter in codex object
@@ -179,6 +182,24 @@ function onDOMContentLoaded() {
     $screenTitle.classList.add('current-state');
 }
 
+function onMouseMove(ev) {
+  if (currentState === STATE.AUTO) {
+    const clientX = ev.clientX;
+    const clientY = ev.clientY;
+    const windowHeight = window.innerHeight;
+    const windowWidth = window.innerWidth;
+
+    const midHeight = windowHeight / 2;
+    const distanceFromMidHeight = midHeight - clientY;
+    const normalizeDistance =  (2 - 0.25) * ((distanceFromMidHeight - (-midHeight)) / (midHeight - (-midHeight) )) + 0.25;
+    let playbackRate = normalizeDistance;
+
+    for (let i = 0; i < currentAudio.length; i++) {
+      currentAudio[i].playbackRate.value = playbackRate;
+    }
+  }
+}
+
 function revealLetter (letter) {
   // fade out instructions if visible
   if ($codexInstructions.style.opacity !== '0') {
@@ -217,23 +238,16 @@ function resetCodex () {
       }
   }
 
-  // fade out all playing audio and reset
-  for (let i = 0; i < currentAudio.length; i++) {
-    const audio = currentAudio[i];
-    const fadeOutIntervals = {};
-    if (audio.ended === false) {
-      fadeOutIntervals[i] = setInterval(function () {
-        if (audio.volume > 0) {
-          audio.volume -= 0.02;
-      }
-        if (audio.volume <= 0.02) {
-          audio.volume = 0;
-          clearInterval(fadeOutIntervals[i]);
-        }
-      }, 50);
+  // fade out all playing audio and stop
+  AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(0.01, AUDIO_CONTEXT.currentTime + 2);
+  setTimeout(function () {
+    for (let i = 0; i < currentAudio.length; i++) {
+      const audioSource = currentAudio[i];
+      audioSource.disconnect();
     }
-  }
-  currentAudio = [];
+    AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(1, AUDIO_CONTEXT.currentTime);
+    currentAudio = [];
+  }, 2100);
 }
 
 function playLetterAudio(letter) {
@@ -241,10 +255,26 @@ function playLetterAudio(letter) {
     if ($letterAudio === undefined) {
         return;
     }
-    // create new audio so same letter can play multiple time
-    const clonedAudio = new Audio($letterAudio.src);
-    currentAudio.push(clonedAudio);
-    clonedAudio.play();
+    var source = AUDIO_CONTEXT.createBufferSource();
+    currentAudio.push(source);
+    var request = new XMLHttpRequest();
+    request.open('GET', $letterAudio.src, true);
+    request.responseType = 'arraybuffer';
+    request.onload = function () { 
+      AUDIO_CONTEXT.decodeAudioData(
+        request.response, 
+        function(buffer) {
+          source.buffer = buffer;
+          source.connect(AUDIO_GAIN_NODE);
+          source.loop = false;
+          source.start(0);
+        },
+        function(e) { 
+          console.log("Error with decoding audio data" + e.err); 
+        }
+      );
+    }
+    request.send()
 }
 
 function transitionToAutoScreen() {
@@ -252,6 +282,7 @@ function transitionToAutoScreen() {
   lastUpdateAutoTime = new Date().getTime();
   nextUpdateAutoTime = 0;
   resetCodex();
+  AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(1, AUDIO_CONTEXT.currentTime + 3);
 }
 
 function transitionToInteractiveScreen() {
@@ -264,6 +295,7 @@ function transitionToInteractiveScreen() {
     $screenCodex.classList.add('current-state');
 
     lastUpdateTime = lastKeypressTime = new Date().getTime();
+    AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(1, AUDIO_CONTEXT.currentTime + 3);
     update();
 }
 
@@ -320,6 +352,7 @@ function updateAuto() {
 // setup events
 document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
 document.addEventListener('keydown', onDocumentKeydown);
+document.addEventListener('mousemove', onMouseMove);
 
 /** MAIN CODEX META OBJECT */
 const codex = [
