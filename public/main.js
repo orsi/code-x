@@ -268,6 +268,7 @@ function onDOMContentLoaded() {
 
   // try to setup mobile audio
   // taken from https://gist.github.com/laziel/7aefabe99ee57b16081c
+  // ** USER MUST NOT BE IN SILENT MODE ON PHONES (i.e. ringer silent) **
   if (AUDIO_CONTEXT.state === 'suspended') {
     var resume = function () {
       AUDIO_CONTEXT.resume();
