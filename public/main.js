@@ -33,8 +33,6 @@ let lastUpdateTime;
 let lastUpdateAutoTime;
 let nextUpdateAutoTime;
 
-AUDIO_GAIN_NODE.connect(AUDIO_CONTEXT.destination);
-
 function hideLetter(letter) {
   // reset letter in codex object
   for (let i = 0; i < codex.length; i++) {
@@ -140,9 +138,17 @@ function onClickVolumeButton(ev) {
   if (isAudioMuted) {
     AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(1, AUDIO_CONTEXT.currentTime + 2);
     isAudioMuted = false;
+    // change font-awesome icon
+    const $icon = $volumeButton.querySelector('i');
+    $icon.classList.remove('fa-volume-mute');
+    $icon.classList.add('fa-volume-up');
   } else {
     AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(0, AUDIO_CONTEXT.currentTime);
     isAudioMuted = true;
+    // change font-awesome icon
+    const $icon = $volumeButton.querySelector('i');
+    $icon.classList.remove('fa-volume-up');
+    $icon.classList.add('fa-volume-mute');
   }
 }
 
@@ -197,6 +203,12 @@ function onDocumentKeydown(ev) {
         resetCodex();
       }
       nextUpdateAutoTime = 0;
+  } else if (currentState === STATE.INFO) {
+    if (keyCode === 27) {
+      // escape
+      transitionToTitleScreen();
+      resetCodex();
+    }
   }
 }
 
@@ -224,6 +236,9 @@ function onDOMContentLoaded() {
   $infoExitButton.addEventListener('click', onClickInfoExitButton);
   $volumeButton.addEventListener('click', onClickVolumeButton);
 
+  // connect gain to audio context
+  AUDIO_GAIN_NODE.connect(AUDIO_CONTEXT.destination);
+
   // load audio
   loadAudioFiles();
 
@@ -243,7 +258,7 @@ function onMouseMove(ev) {
 
     const midHeight = windowHeight / 2;
     const distanceFromMidHeight = midHeight - clientY;
-    const normalizeDistance =  (2 - 0.25) * ((distanceFromMidHeight - (-midHeight)) / (midHeight - (-midHeight) )) + 0.25;
+    const normalizeDistance =  (2 - 0.25) * ((distanceFromMidHeight - (-midHeight)) / (midHeight - (-midHeight))) + 0.25;
     let playbackRate = normalizeDistance;
 
     for (let i = 0; i < currentAudio.length; i++) {

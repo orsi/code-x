@@ -4,7 +4,8 @@
         <meta charset="utf-8">
         <meta name="description" content="Codex">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" type="text/css" href="styles.css">
+        <link href="/css/styles.css" rel="stylesheet">
+        <link href="/css/all.css" rel="stylesheet">
         <script src="main.js"></script>
     </head>
     <body>
@@ -22,14 +23,20 @@
                 <div id="codex-container"></div>
                 <div id="codex-instructions">Press any letter on your keyboard</div>
                 <div id="codex-toolbar">
-                    <button id="codex-volume-button">vol</button>
-                    <button id="codex-info-button">?</button>
+                    <button id="codex-volume-button">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                    <button id="codex-info-button">
+                        <i class="far fa-question-circle"></i>
+                    </button>
                 </div>
             </section>
 
             <section id="screen-info"
                 class="d-none">
-                <button id="info-exit-button">X</button>
+                <button id="info-exit-button">
+                    <i class="far fa-times-circle"></i>
+                </button>
                 <h4><span class="colour-red">C</span>ode X Instructions:</h4>
                 <p>
                     <span class="colour-red">C</span>ode X is an interactive exploration of text, image and sound. Interaction is directed from an exploration of the letters on the keyboard, the mouse, and the space bar. Press any letter on the keyboard to activate your performance. Press the space bar to erase the screen (page) and begin your performance again (on a new page). If the keyboard is left untouched for 10 seconds <span class="colour-red">C</span>ode X will enter a random automated-mode. Moving the mouse up or down the screen in random automated-mode will change the audio pitch. While in random automated-mode pressing any letter will reengage the interactive programming-mode.
