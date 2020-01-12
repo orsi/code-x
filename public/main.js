@@ -29,7 +29,7 @@ let currentAudio = [];
 let currentState;
 let isAudioMuted = false;
 let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-let isMobileTouched = false;
+let isMobileAudioEnabled = false;
 let lastKeypressTime;
 let lastUpdateTime;
 let lastUpdateAutoTime;
@@ -158,15 +158,6 @@ function onClickInfoExitButton(ev) {
 }
 
 function onClickVolumeButton(ev) {
-  // make audio work on mobile
-  if (isMobile && !isMobileTouched) {
-    let source = AUDIO_CONTEXT.createBufferSource();
-    source.connect(AUDIO_CONTEXT.destination);
-    source.start(0);
-    source.disconnect();
-    isMobileTouched = true;
-  }
-
   if (isAudioMuted) {
     fadeGain(1, .5);
     isAudioMuted = false;
@@ -270,14 +261,25 @@ function onDOMContentLoaded() {
   $enterButton.addEventListener('click', onClickEnterButton);
   $infoButton.addEventListener('click', onClickInfoButton);
   $infoExitButton.addEventListener('click', onClickInfoExitButton);
-  if (isMobile) {
-    $volumeButton.addEventListener('touchstart', onClickVolumeButton);
-  } else {
-    $volumeButton.addEventListener('click', onClickVolumeButton);
-  }
+  $volumeButton.addEventListener('click', onClickVolumeButton);
 
   // connect gain to audio context
   AUDIO_GAIN_NODE.connect(AUDIO_CONTEXT.destination);
+
+  // try to setup mobile audio
+  // taken from https://gist.github.com/laziel/7aefabe99ee57b16081c
+  if (AUDIO_CONTEXT.state === 'suspended') {
+    var resume = function () {
+      AUDIO_CONTEXT.resume();
+      setTimeout(function () {
+        if (AUDIO_CONTEXT.state === 'running') {
+          document.body.removeEventListener('touchend', resume, false);
+          isMobileAudioEnabled = true;
+        }
+      }, 0);
+    };
+    document.body.addEventListener('touchend', resume, false);
+  }
 
   // load audio
   loadAudioFiles();
