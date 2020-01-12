@@ -66,6 +66,15 @@ function fadeOutScreen(screen) {
   screen.classList.remove('current-state');
 }
 
+function fadeGain(value, seconds) {
+  // cancel any current schedules
+  AUDIO_GAIN_NODE.gain.cancelScheduledValues(AUDIO_CONTEXT.currentTime);
+  // set checkpoint
+  AUDIO_GAIN_NODE.gain.setValueAtTime(AUDIO_GAIN_NODE.gain.value, AUDIO_CONTEXT.currentTime);
+  // now fade
+  AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(value, AUDIO_CONTEXT.currentTime + seconds);
+}
+
 function getFadeoutLetterTime() {
   const nextTime = Math.floor(
     Math.random() * (MAX_FADEOUT_LETTER_TIME - MIN_FADEOUT_LETTER_TIME)
@@ -136,14 +145,14 @@ function onClickInfoExitButton(ev) {
 
 function onClickVolumeButton(ev) {
   if (isAudioMuted) {
-    AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(1, AUDIO_CONTEXT.currentTime + 2);
+    fadeGain(1, .5);
     isAudioMuted = false;
     // change font-awesome icon
     const $icon = $volumeButton.querySelector('i');
     $icon.classList.remove('fa-volume-mute');
     $icon.classList.add('fa-volume-up');
   } else {
-    AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(0, AUDIO_CONTEXT.currentTime);
+    fadeGain(0, .5);
     isAudioMuted = true;
     // change font-awesome icon
     const $icon = $volumeButton.querySelector('i');
@@ -306,13 +315,16 @@ function resetCodex () {
   }
 
   // fade out all playing audio and stop
-  AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(0.01, AUDIO_CONTEXT.currentTime + 2);
+  fadeGain(0, .5);
   setTimeout(function () {
     for (let i = 0; i < currentAudio.length; i++) {
       const audioSource = currentAudio[i];
       audioSource.disconnect();
     }
-    AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(1, AUDIO_CONTEXT.currentTime);
+    // reset gain if not muted
+    if (isAudioMuted === false) {
+      fadeGain(1, .5);
+    }
     currentAudio = [];
   }, 2100);
 }
@@ -349,7 +361,7 @@ function transitionToAutoScreen() {
   lastUpdateAutoTime = new Date().getTime();
   nextUpdateAutoTime = 0;
   resetCodex();
-  AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(1, AUDIO_CONTEXT.currentTime + 3);
+  fadeGain(1, .5);
 }
 
 function transitionToInfoScreen() {
@@ -364,7 +376,7 @@ function transitionToInteractiveScreen() {
   fadeOutAllScreens();
   fadeInScreen($screenCodex);
   lastUpdateTime = lastKeypressTime = new Date().getTime();
-  AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(1, AUDIO_CONTEXT.currentTime + 3);
+  fadeGain(1, .5);
   update();
 }
 
