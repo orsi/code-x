@@ -26,12 +26,13 @@ let $screenCodex;
 let $screenInfo;
 let $volumeButton;
 let currentAudio = [];
-let currentState = STATE.TITLE;
+let currentState;
 let isAudioMuted = false;
 let lastKeypressTime;
 let lastUpdateTime;
 let lastUpdateAutoTime;
 let nextUpdateAutoTime;
+let previousState;
 
 function hideLetter(letter) {
   // reset letter in codex object
@@ -49,21 +50,23 @@ function hideLetter(letter) {
   }
 }
 
-function fadeInScreen(screen) {
-  screen.classList.add('fade-in');
-  screen.classList.add('fading-in');
-  screen.classList.add('current-state');
+function fadeInElement($element) {
+  $element.classList.remove('fade-out');
+  $element.classList.remove('fading-out');
+  $element.classList.add('fade-in');
+  $element.classList.add('fading-in');
 }
 
 function fadeOutAllScreens() {
   for (let i = 0; i < SCREENS.length; i++) {
-    fadeOutScreen(SCREENS[i]);
+    fadeOutElement(SCREENS[i]);
   }
 }
-function fadeOutScreen(screen) {
-  screen.classList.add('fade-out');
-  screen.classList.add('fading-out');
-  screen.classList.remove('current-state');
+function fadeOutElement($element) {
+  $element.classList.remove('fade-in');
+  $element.classList.remove('fading-in');
+  $element.classList.add('fade-out');
+  $element.classList.add('fading-out');
 }
 
 function fadeGain(value, seconds) {
@@ -187,29 +190,33 @@ function onDocumentKeydown(ev) {
         transitionToTitleScreen();
         resetCodex();
       }
+
+      if ($codexInstructions.style.opacity !== '0') {
+        fadeOutElement($codexInstructions);
+      }
   } else if (currentState === STATE.AUTO) {
       if (keyCode >= 65 && keyCode <= 90) {
         // upper case letters
-        transitionToInteractiveScreen();
         resetCodex();
+        transitionToInteractiveScreen();
 
         const letter = String.fromCharCode(keyCode).toLowerCase();
         revealLetter(letter);
       } else if (keyCode >= 97 && keyCode <= 122) {
         // lower case letters
-        transitionToInteractiveScreen();
         resetCodex();
+        transitionToInteractiveScreen();
 
         const letter = String.fromCharCode(keyCode);
         revealLetter(letter);
       } else if (keyCode === 32) {
         // space
-        transitionToInteractiveScreen();
         resetCodex();
+        transitionToInteractiveScreen();
       } else if (keyCode === 27) {
         // escape
-        transitionToTitleScreen();
         resetCodex();
+        transitionToTitleScreen();
       }
       nextUpdateAutoTime = 0;
   } else if (currentState === STATE.INFO) {
@@ -277,11 +284,6 @@ function onMouseMove(ev) {
 }
 
 function revealLetter (letter) {
-  // fade out instructions if visible
-  if ($codexInstructions.style.opacity !== '0') {
-    $codexInstructions.style.opacity = '0';
-  }
-
   let doPlayAudio = false;
   for (let i = 0; i < codex.length; i++) {
       // line
@@ -356,35 +358,48 @@ function playLetterAudio(letter) {
     request.send()
 }
 
+function setCurrentState(state, $element) {
+  resetCodex();
+  previousState = currentState;
+  currentState = state;
+  for (let i = 0; i < SCREENS.length; i++) {
+    SCREENS[i].classList.remove('current-state');
+  }
+  $element.classList.add('current-state');
+  fadeOutAllScreens();
+  fadeInElement($element);
+}
+
 function transitionToAutoScreen() {
-  currentState = STATE.AUTO;
+  setCurrentState(STATE.AUTO, $screenCodex);
+  // fade out instructions if last state
+  // was INTERACTIVE
+  if (previousState === STATE.INTERACTIVE) {
+    fadeOutElement($codexInstructions);
+  }
   lastUpdateAutoTime = new Date().getTime();
   nextUpdateAutoTime = 0;
-  resetCodex();
   fadeGain(1, .5);
 }
 
 function transitionToInfoScreen() {
-  currentState = STATE.INFO;
-  fadeOutAllScreens();
-  fadeInScreen($screenInfo);
-  resetCodex();
+  setCurrentState(STATE.INFO, $screenInfo);
 }
 
 function transitionToInteractiveScreen() {
-  currentState = STATE.INTERACTIVE;
-  fadeOutAllScreens();
-  fadeInScreen($screenCodex);
+  setCurrentState(STATE.INTERACTIVE, $screenCodex);
+  // don't show instructions again if last state
+  // was AUTO
+  if (previousState !== STATE.AUTO) {
+    fadeInElement($codexInstructions);
+  }
   lastUpdateTime = lastKeypressTime = new Date().getTime();
   fadeGain(1, .5);
   update();
 }
 
 function transitionToTitleScreen() {
-  currentState = STATE.TITLE;
-  fadeOutAllScreens();
-  fadeInScreen($screenTitle);
-  resetCodex();
+  setCurrentState(STATE.TITLE, $screenTitle);
 }
 
 function update() {
