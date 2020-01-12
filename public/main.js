@@ -270,8 +270,11 @@ function onDOMContentLoaded() {
   $enterButton.addEventListener('click', onClickEnterButton);
   $infoButton.addEventListener('click', onClickInfoButton);
   $infoExitButton.addEventListener('click', onClickInfoExitButton);
-  $volumeButton.addEventListener('click', onClickVolumeButton);
-  $volumeButton.addEventListener('touchstart', onClickVolumeButton);
+  if (isMobile) {
+    $volumeButton.addEventListener('touchstart', onClickVolumeButton);
+  } else {
+    $volumeButton.addEventListener('click', onClickVolumeButton);
+  }
 
   // connect gain to audio context
   AUDIO_GAIN_NODE.connect(AUDIO_CONTEXT.destination);
