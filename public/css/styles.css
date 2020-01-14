@@ -26,8 +26,6 @@ button {
     min-width: 100vw;
 }
 .current-state {
-    display: block !important;
-    opacity: 1 !important;
     pointer-events: all !important;
     visibility: visible !important;
 }

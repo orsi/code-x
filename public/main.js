@@ -52,23 +52,42 @@ function hideLetter(letter) {
   }
 }
 
-function fadeInElement($element) {
-  $element.classList.remove('fade-out');
-  $element.classList.remove('fading-out');
-  $element.classList.add('fade-in');
-  $element.classList.add('fading-in');
+function fadeInElement($element, time) {
+  $element.style.opacity = 0;
+
+  var last = +new Date();
+  var tick = function() {
+    $element.style.opacity = +$element.style.opacity + (new Date() - last) / time;
+    last = +new Date();
+
+    if (+$element.style.opacity < 1) {
+      (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 16);
+    }
+  };
+
+  tick();
 }
 
 function fadeOutAllScreens() {
   for (let i = 0; i < SCREENS.length; i++) {
-    fadeOutElement(SCREENS[i]);
+    fadeOutElement(SCREENS[i], 1000);
   }
 }
-function fadeOutElement($element) {
-  $element.classList.remove('fade-in');
-  $element.classList.remove('fading-in');
-  $element.classList.add('fade-out');
-  $element.classList.add('fading-out');
+
+function fadeOutElement($element, time) {
+  $element.style.opacity = 1;
+
+  var last = +new Date();
+  var tick = function() {
+    $element.style.opacity = +$element.style.opacity - (new Date() - last) / time;
+    last = +new Date();
+
+    if (+$element.style.opacity > 0) {
+      (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 16);
+    }
+  };
+
+  tick();
 }
 
 function fadeGain(value, seconds) {
@@ -202,8 +221,8 @@ function onKeydown(ev) {
       resetCodex();
     }
 
-    if ($codexInstructions.style.opacity !== '0') {
-      fadeOutElement($codexInstructions);
+    if (+$codexInstructions.style.opacity > 0) {
+      fadeOutElement($codexInstructions, 1000);
     }
   } else if (currentState === STATE.AUTO) {
     if (keyCode >= 65 && keyCode <= 90) {
@@ -407,13 +426,13 @@ function setCurrentState(state, $element) {
   }
   $element.classList.add('current-state');
   fadeOutAllScreens();
-  fadeInElement($element);
+  fadeInElement($element, 1000);
 }
 
 function transitionToAutoScreen() {
   setCurrentState(STATE.AUTO, $screenCodex);
   // fade out instructions
-  fadeOutElement($codexInstructions);
+  fadeOutElement($codexInstructions, 1000);
   lastUpdateAutoTime = new Date().getTime();
   nextUpdateAutoTime = 0;
   update();
@@ -433,7 +452,7 @@ function transitionToInteractiveScreen() {
   // don't show instructions again if last state
   // was AUTO
   if (previousState !== STATE.AUTO) {
-    fadeInElement($codexInstructions);
+    fadeInElement($codexInstructions, 1000);
   }
   lastUpdateTime = lastKeypressTime = new Date().getTime();
   update();
