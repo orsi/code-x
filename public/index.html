@@ -9,32 +9,39 @@
         <script src="main.js"></script>
     </head>
     <body>
-        <div class="main-container">
+        <div class="container">
             
             <section id="screen-title"
-                class="center">
-                <h1 id="main-title">c<span class="colour-red">ode</span> x</h1>
-                <h3 id="mark-sutherland">w. mark sutherland</h3>
-                <button id="enter-button">enter</button>
+                class="screen">
+                <div id="title-container"
+                    class="center-y text-center w-100">
+                    <h1 id="title">c<span class="colour-red">ode</span> x</h1>
+                    <hr id="red-bar" />
+                    <h3 id="mark-sutherland">w. mark sutherland</h3>
+                    <button id="enter-button">enter</button>
+                </div>
             </section>
 
             <section id="screen-codex"
-                    class="center d-none">
-                <div id="codex-container"></div>
-                <div id="codex-instructions">Press any letter on your keyboard</div>
+                    class="screen">
+                <div id="codex-container"
+                    class="center-y">
+                    <div id="codex"></div>
+                    <div id="codex-instructions">Press any letter on your keyboard</div>
+                </div>
                 <div id="codex-toolbar">
                     <button id="codex-volume-button"
                         title="Turn volume on or off">
                         <i class="fas fa-volume-up"></i>
                     </button>
-                    <button id="codex-info-button"
+                    <!-- <button id="codex-info-button"
                         title="About Code X">
                         <i class="far fa-question-circle"></i>
-                    </button>
+                    </button> -->
                 </div>
             </section>
 
-            <section id="screen-info"
+            <!-- <section id="screen-info"
                 class="d-none">
                 <button id="info-exit-button">
                     <i class="far fa-times-circle"></i>
@@ -59,7 +66,7 @@
                 <p>
                     If the computer keyboard is untouched for 10 seconds <span class="colour-red">C</span>ode X will begin to operate in random automated-mode. <span class="colour-red">C</span>ode X will replicate interactivity producing sound and visual poems until the keyboard is touched and the interactive program is re-engaged.
                 </p>
-            </section>
+            </section> -->
         </div>
     </body>
 </html>

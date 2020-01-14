@@ -16,79 +16,37 @@ button {
     outline: none;
     padding: 12px;
 }
+
 .colour-red {
     color: red;
 }
-
-.main-container {
+.container {
     position: relative;
     min-height: 100vh;
     min-width: 100vw;
 }
-.center {
-    left: 50%;
-    position: absolute;
-    text-align: center;
-    top: 50%;
-    transform: translate(-50%, -50%);
-}
-.d-none {
-    display: none;
-    visibility: hidden;
-}
-
-
 .current-state {
-    display: block;
+    display: block !important;
     opacity: 1 !important;
+    pointer-events: all !important;
     visibility: visible !important;
 }
-.fade-in {
-    opacity: 0;
-    visibility: visible;
+.center-y {
+    position: absolute;
+    top: 50%;
+    transform: translate(0, -50%);
 }
-.fading-in {
-    opacity: 1;
-    transition: opacity .2s ease-in;
-}
-.fade-out {
-    opacity: 1;
-    visibility: visible;
-}
-.fading-out {
-    opacity: 0;
-    transition: opacity .2s ease-in;
-}
-
-#screen-title {
+.screen {
+    bottom: 0;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    pointer-events: none;
+    visibility: hidden;
     width: 100%;
-}
-#main-title {
-    line-height: 1;
-    font-size: .85rem;
-    padding: 0 0 8px 0;
-    margin: 0 0 8px 0;
-    border-bottom: 4px solid red;
-}
-#mark-sutherland {
-    font-size: .3rem;
-    margin: 0;
-}
-#enter-button {
-    background: transparent;
-    border: none;
-    color: white;
-    cursor: pointer;
-    font: inherit;
-    font-size: .85rem;
-    font-weight: 600;
-}
 
-#codex-container {
-    cursor: default;
-    font-size: .2rem;
-    text-align: justify;
-    text-align-last: justify;
     /* disable select */
     user-select: none; /* supported by Chrome and Opera */
     -webkit-user-select: none; /* Safari */
@@ -96,7 +54,55 @@ button {
     -moz-user-select: none; /* Firefox */
     -ms-user-select: none; /* Internet Explorer/Edge */
 }
-#codex-container .line::after {
+.text-center {
+    text-align: center;
+}
+.w-100 {
+    width: 100%;
+}
+
+/* small components */
+#title-container {
+    font-size: .85rem;
+}
+#title {
+    font-size: 1em;
+    line-height: 1;
+    margin: 0;
+}
+#red-bar {
+    border: 0;
+    border-top: 2px solid red;
+    padding: 0;
+    margin: 8px 0;
+}
+#mark-sutherland {
+    font-size: .3rem;
+    margin: 0;
+}
+#enter-button {
+    font: inherit;
+    font-weight: 600;
+}
+
+#codex-container {
+    display: inline-block;
+    font-size: 2.2vh;
+    text-align: center;
+    width: 100%;
+}
+@media (min-width: 768px) {
+    #codex-container {
+        font-size: 2.65vmin;
+    }
+}
+#codex {
+    display: inline-block;
+    text-align: justify;
+    text-align-last: justify;
+    padding: 8px;
+}
+#codex .line::after {
     /* hack for older browsers 
      * text-align: justify doesn't work
      * on single lines, so we need to 'add'
@@ -106,17 +112,20 @@ button {
     display: inline-block;
     width: 100%;	
 }
-#codex-container .letter {
+#codex .letter {
     transition: opacity 3s ease-in;
 }
 #codex-instructions {
-    font-size: .2rem;
     text-align: center;
-    transition: opacity .5s ease-in-out;
+    padding: 8px;
 }
 #codex-toolbar {
+    bottom: 0;
+    left: 0;
+    padding: 16px;
+    position: fixed;
 }
-
+/* 
 #screen-info {
     box-sizing: border-box;
     font-size: 16px;
@@ -141,4 +150,22 @@ button {
     position: sticky;
     top: 16px;
     float: right;
+} */
+
+/* transitions */
+.fade-in {
+    opacity: 0;
+    visibility: visible;
+}
+.fading-in {
+    opacity: 1;
+    transition: opacity .2s ease-in;
+}
+.fade-out {
+    opacity: 1;
+    visibility: visible;
+}
+.fading-out {
+    opacity: 0;
+    transition: opacity .2s ease-in;
 }

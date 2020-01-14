@@ -11,19 +11,19 @@ const STATE = {
   TITLE: 0,
   INTERACTIVE: 1,
   AUTO: 2,
-  INFO: 3
+  DEBUG: 3
 };
 const SCREENS = [];
 const TIME_TIL_AUTO = 10000;
 const TIME_TIL_FADEOUT_LETTER = 5000;
-let $codexContainer;
+let $codex;
 let $codexInstructions;
 let $enterButton;
-let $infoButton;
-let $infoExitButton;
+// let $infoButton;
+// let $infoExitButton;
 let $screenTitle;
 let $screenCodex;
-let $screenInfo;
+// let $screenInfo;
 let $volumeButton;
 let currentAudio = [];
 let currentState;
@@ -42,12 +42,12 @@ function hideLetter(letter) {
     // line
     const codexLine = codex[i];
     for (let j = 0; j < codexLine.length; j++) {
-        // letter
-        const codexLetter = codexLine[j];
-        if (codexLetter.letter === letter) {
-          codexLetter.element.style.opacity = 0;
-          codexLetter.visible = false;
-        }
+      // letter
+      const codexLetter = codexLine[j];
+      if (codexLetter.letter === letter) {
+        codexLetter.element.style.opacity = 0;
+        codexLetter.visible = false;
+      }
     }
   }
 }
@@ -109,31 +109,31 @@ function getNextUpdateAutoTime() {
  * @param {HTMLElement} container 
  */
 function generateCodexHtml(container) {
-    // container.innerHTML = mainParagraph;
-    for (let i = 0; i < codex.length; i++) {
-        // line
-        const line = codex[i];
-        const $div = document.createElement('div');
-        $div.classList.add('line');
-        container.appendChild($div);
-        for (let j = 0; j < line.length; j++) {
-            // letter
-            const letter = line[j];
-            const $span = letter.element = document.createElement('span');
-            $span.textContent = letter.letter;
-            $span.classList.add('letter');
-            $span.style.color = letter.color;
-            $span.style.opacity = 0;
-            $div.appendChild($span);
-        }
+  // container.innerHTML = mainParagraph;
+  for (let i = 0; i < codex.length; i++) {
+    // line
+    const line = codex[i];
+    const $div = document.createElement('div');
+    $div.classList.add('line');
+    container.appendChild($div);
+    for (let j = 0; j < line.length; j++) {
+      // letter
+      const letter = line[j];
+      const $span = letter.element = document.createElement('span');
+      $span.textContent = letter.letter;
+      $span.classList.add('letter');
+      $span.style.color = letter.color;
+      $span.style.opacity = 0;
+      $div.appendChild($span);
     }
+  }
 }
 
 function loadAudioFiles() {
-    for (i = 0; i < 26; i++) {
-        const letter = String.fromCharCode(97 + i);
-        AUDIO_FILES[letter] = new Audio(`${RESOURCE_PATH}${letter.toUpperCase()}.mp3`);
-    }
+  for (i = 0; i < 26; i++) {
+    const letter = String.fromCharCode(97 + i);
+    AUDIO_FILES[letter] = new Audio(`${RESOURCE_PATH}${letter.toUpperCase()}.mp3`);
+  }
 }
 
 function onClickEnterButton(ev) {
@@ -145,17 +145,17 @@ function onClickEnterButton(ev) {
   }
 }
 
-function onClickInfoButton(ev) {
-  transitionToInfoScreen();
-}
+// function onClickInfoButton(ev) {
+//   transitionToInfoScreen();
+// }
 
-function onClickInfoExitButton(ev) {
-  if (isMobile) {
-    transitionToAutoScreen();
-  } else {
-    transitionToInteractiveScreen();
-  }
-}
+// function onClickInfoExitButton(ev) {
+//   if (isMobile) {
+//     transitionToAutoScreen();
+//   } else {
+//     transitionToInteractiveScreen();
+//   }
+// }
 
 function onClickVolumeButton(ev) {
   if (isAudioMuted) {
@@ -175,92 +175,97 @@ function onClickVolumeButton(ev) {
   }
 }
 
-function onDocumentKeydown(ev) {
+function onKeydown(ev) {
   lastKeypressTime = new Date().getTime();
 
   // get character code depending on browser compatibility
   let keyCode;
   if (ev.which || ev.keyCode || ev.charCode) {
-      keyCode = ev.which || ev.keyCode || ev.charCode;
+    keyCode = ev.which || ev.keyCode || ev.charCode;
   }
 
   if (currentState === STATE.INTERACTIVE) {
-      if (keyCode >= 65 && keyCode <= 90) {
-          // upper case letters
-          const letter = String.fromCharCode(keyCode).toLowerCase();
-          revealLetter(letter);
-      } else if (keyCode >= 97 && keyCode <= 122) {
-          // lower case letters
-          const letter = String.fromCharCode(keyCode);
-          revealLetter(letter);
-      } else if (keyCode === 32) {
-          // space
-          resetCodex();
-      } else if (keyCode === 27) {
-        // escape
-        transitionToTitleScreen();
-        resetCodex();
-      }
-
-      if ($codexInstructions.style.opacity !== '0') {
-        fadeOutElement($codexInstructions);
-      }
-  } else if (currentState === STATE.AUTO) {
-      if (keyCode >= 65 && keyCode <= 90) {
-        // upper case letters
-        resetCodex();
-        transitionToInteractiveScreen();
-
-        const letter = String.fromCharCode(keyCode).toLowerCase();
-        revealLetter(letter);
-      } else if (keyCode >= 97 && keyCode <= 122) {
-        // lower case letters
-        resetCodex();
-        transitionToInteractiveScreen();
-
-        const letter = String.fromCharCode(keyCode);
-        revealLetter(letter);
-      } else if (keyCode === 32) {
-        // space
-        resetCodex();
-        transitionToInteractiveScreen();
-      } else if (keyCode === 27) {
-        // escape
-        resetCodex();
-        transitionToTitleScreen();
-      }
-      nextUpdateAutoTime = 0;
-  } else if (currentState === STATE.INFO) {
-    if (keyCode === 27) {
+    if (keyCode >= 65 && keyCode <= 90) {
+      // upper case letters
+      const letter = String.fromCharCode(keyCode).toLowerCase();
+      revealLetter(letter);
+    } else if (keyCode >= 97 && keyCode <= 122) {
+      // lower case letters
+      const letter = String.fromCharCode(keyCode);
+      revealLetter(letter);
+    } else if (keyCode === 32) {
+      // space
+      resetCodex();
+    } else if (keyCode === 27) {
       // escape
       transitionToTitleScreen();
       resetCodex();
+    }
+
+    if ($codexInstructions.style.opacity !== '0') {
+      fadeOutElement($codexInstructions);
+    }
+  } else if (currentState === STATE.AUTO) {
+    if (keyCode >= 65 && keyCode <= 90) {
+      // upper case letters
+      resetCodex();
+      transitionToInteractiveScreen();
+
+      const letter = String.fromCharCode(keyCode).toLowerCase();
+      revealLetter(letter);
+    } else if (keyCode >= 97 && keyCode <= 122) {
+      // lower case letters
+      resetCodex();
+      transitionToInteractiveScreen();
+
+      const letter = String.fromCharCode(keyCode);
+      revealLetter(letter);
+    } else if (keyCode === 32) {
+      // space
+      resetCodex();
+      transitionToInteractiveScreen();
+    } else if (keyCode === 27) {
+      // escape
+      resetCodex();
+      transitionToTitleScreen();
+    }
+    nextUpdateAutoTime = 0;
+  } else if (currentState === STATE.TITLE) {
+    if (keyCode === 'D'.charCodeAt(0)) {
+      // upper case letters
+      transitionToDebugScreen();
+    }
+  } else if (currentState === STATE.DEBUG) {
+    if (keyCode === 27) {
+      // escape
+      resetCodex();
+      transitionToTitleScreen();
     }
   }
 }
 
 function onDOMContentLoaded() {
   // select elements
-  $codexContainer = document.querySelector('#codex-container');
+  $codex = document.querySelector('#codex');
   $codexInstructions = document.querySelector('#codex-instructions');
   $enterButton = document.querySelector('#enter-button');
-  $infoButton = document.querySelector('#codex-info-button');
-  $infoExitButton = document.querySelector('#info-exit-button');
+  // $infoButton = document.querySelector('#codex-info-button');
+  // $infoExitButton = document.querySelector('#info-exit-button');
   $screenTitle = document.querySelector('#screen-title');
   $screenCodex = document.querySelector('#screen-codex');
-  $screenInfo = document.querySelector('#screen-info');
+  // $screenInfo = document.querySelector('#screen-info');
   $volumeButton = document.querySelector('#codex-volume-button');
 
   SCREENS.push($screenTitle);
   SCREENS.push($screenCodex);
-  SCREENS.push($screenInfo);
+  // SCREENS.push($screenInfo);
 
   // setup events
-  document.addEventListener('keydown', onDocumentKeydown);
+  document.addEventListener('keydown', onKeydown);
   document.addEventListener('mousemove', onMouseMove);
   $enterButton.addEventListener('click', onClickEnterButton);
-  $infoButton.addEventListener('click', onClickInfoButton);
-  $infoExitButton.addEventListener('click', onClickInfoExitButton);
+  // $infoButton.addEventListener('click', onClickInfoButton);
+  // $infoExitButton.addEventListener('click', onClickInfoExitButton);
   $volumeButton.addEventListener('click', onClickVolumeButton);
 
   // connect gain to audio context
@@ -286,7 +291,7 @@ function onDOMContentLoaded() {
   loadAudioFiles();
 
   // generate codex
-  generateCodexHtml($codexContainer);
+  generateCodexHtml($codex);
 
   // initialize title screen
   transitionToTitleScreen();
@@ -301,7 +306,7 @@ function onMouseMove(ev) {
 
     const midHeight = windowHeight / 2;
     const distanceFromMidHeight = midHeight - clientY;
-    const normalizeDistance =  (2 - 0.25) * ((distanceFromMidHeight - (-midHeight)) / (midHeight - (-midHeight))) + 0.25;
+    const normalizeDistance = (2 - 0.25) * ((distanceFromMidHeight - (-midHeight)) / (midHeight - (-midHeight))) + 0.25;
     let playbackRate = normalizeDistance;
 
     for (let i = 0; i < currentAudio.length; i++) {
@@ -310,37 +315,45 @@ function onMouseMove(ev) {
   }
 }
 
-function revealLetter (letter) {
+function revealAll() {
+  console.log('reveal all');
+  for (let i = 65; i <= 90; i++) {
+    let letter = String.fromCharCode(i).toLowerCase();
+    revealLetter(letter);
+  }
+}
+
+function revealLetter(letter) {
   let doPlayAudio = false;
   for (let i = 0; i < codex.length; i++) {
-      // line
-      const codexLine = codex[i];
-      for (let j = 0; j < codexLine.length; j++) {
-          // letter
-          const codexLetter = codexLine[j];
-          if (codexLetter.letter === letter) {
-              doPlayAudio = true;
-              codexLetter.element.style.opacity = 1;
-              codexLetter.visible = true;
-          }
+    // line
+    const codexLine = codex[i];
+    for (let j = 0; j < codexLine.length; j++) {
+      // letter
+      const codexLetter = codexLine[j];
+      if (codexLetter.letter === letter) {
+        doPlayAudio = true;
+        codexLetter.element.style.opacity = 1;
+        codexLetter.visible = true;
       }
+    }
   }
   if (doPlayAudio) {
     playLetterAudio(letter);
   }
 }
 
-function resetCodex () {
+function resetCodex() {
   // reset all visiblity in codex object
   for (let i = 0; i < codex.length; i++) {
-      // line
-      const codexLine = codex[i];
-      for (let j = 0; j < codexLine.length; j++) {
-          // letter
-          const codexLetter = codexLine[j];
-          codexLetter.element.style.opacity = 0;
-          codexLetter.visible = false;
-      }
+    // line
+    const codexLine = codex[i];
+    for (let j = 0; j < codexLine.length; j++) {
+      // letter
+      const codexLetter = codexLine[j];
+      codexLetter.element.style.opacity = 0;
+      codexLetter.visible = false;
+    }
   }
 
   // fade out all playing audio and stop
@@ -359,30 +372,30 @@ function resetCodex () {
 }
 
 function playLetterAudio(letter) {
-    const $letterAudio = AUDIO_FILES[letter];
-    if ($letterAudio === undefined) {
-        return;
-    }
-    var source = AUDIO_CONTEXT.createBufferSource();
-    currentAudio.push(source);
-    var request = new XMLHttpRequest();
-    request.open('GET', $letterAudio.src, true);
-    request.responseType = 'arraybuffer';
-    request.onload = function () { 
-      AUDIO_CONTEXT.decodeAudioData(
-        request.response, 
-        function(buffer) {
-          source.buffer = buffer;
-          source.connect(AUDIO_GAIN_NODE);
-          source.loop = false;
-          source.start(0);
-        },
-        function(e) { 
-          console.log("Error with decoding audio data" + e.err); 
-        }
-      );
-    }
-    request.send()
+  const $letterAudio = AUDIO_FILES[letter];
+  if ($letterAudio === undefined) {
+    return;
+  }
+  var source = AUDIO_CONTEXT.createBufferSource();
+  currentAudio.push(source);
+  var request = new XMLHttpRequest();
+  request.open('GET', $letterAudio.src, true);
+  request.responseType = 'arraybuffer';
+  request.onload = function () {
+    AUDIO_CONTEXT.decodeAudioData(
+      request.response,
+      function (buffer) {
+        source.buffer = buffer;
+        source.connect(AUDIO_GAIN_NODE);
+        source.loop = false;
+        source.start(0);
+      },
+      function (e) {
+        console.log("Error with decoding audio data" + e.err);
+      }
+    );
+  }
+  request.send()
 }
 
 function setCurrentState(state, $element) {
@@ -406,8 +419,13 @@ function transitionToAutoScreen() {
   update();
 }
 
-function transitionToInfoScreen() {
-  setCurrentState(STATE.INFO, $screenInfo);
+// function transitionToInfoScreen() {
+//   setCurrentState(STATE.INFO, $screenInfo);
+// }
+
+function transitionToDebugScreen() {
+  setCurrentState(STATE.DEBUG, $screenCodex);
+  revealAll();
 }
 
 function transitionToInteractiveScreen() {
@@ -432,13 +450,13 @@ function update() {
 
   // switch to auto state when a key hasn't been pressed
   // in 10 seconds
-  if (currentState === STATE.INTERACTIVE && 
+  if (currentState === STATE.INTERACTIVE &&
     now - lastKeypressTime > TIME_TIL_AUTO
   ) {
     transitionToAutoScreen();
   }
 
-  if (currentState === STATE.AUTO && 
+  if (currentState === STATE.AUTO &&
     lastUpdateTime - lastUpdateAutoTime > nextUpdateAutoTime
   ) {
     updateAuto();
@@ -470,4602 +488,4602 @@ document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
 
 /** MAIN CODEX META OBJECT */
 const codex = [
-    [
-      {
-        "color": "white",
-        "letter": "w",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "p",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "u",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "b",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "u",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "v",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "y",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "k",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "y",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "f",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "x",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "p",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "u",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "f",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "f",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "k",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "red",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "u",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "f",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "v",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "q",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "u",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "k",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "y",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "f",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "v",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "u",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "p",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "red",
-        "letter": "v",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "w",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "f",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "p",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "j",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "p",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "b",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "b",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "x",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "y",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "z",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "w",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "w",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "v",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "w",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "f",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "u",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "p",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "w",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "f",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "y",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "p",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "p",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "z",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "y",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "p",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "f",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "y",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "w",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "z",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "z",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "q",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "u",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "z",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "y",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "w",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "f",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "k",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "p",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "w",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "y",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "u",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "y",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "p",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "p",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "x",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "w",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "y",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "u",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "f",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "w",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "m",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "p",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "b",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "u",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "k",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "f",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "p",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "r",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "p",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "u",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "g",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "h",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "f",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "s",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "b",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "y",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "f",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "a",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": " ",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "i",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "n",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "v",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "l",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "u",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "t",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      }
-    ],
-    [
-      {
-        "color": "white",
-        "letter": "c",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "o",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "d",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "red",
-        "letter": "e",
-        "visible": false,
-        "element": null
-      },
-      {
-        "color": "white",
-        "letter": "x",
-        "visible": false,
-        "element": null
-      }
-    ]
-  ];
+  [
+    {
+      "color": "white",
+      "letter": "w",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "p",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "u",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "b",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "u",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "v",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "y",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "k",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "y",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "f",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "x",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "p",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "u",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "f",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "f",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "k",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "red",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "u",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "f",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "v",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "q",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "u",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "k",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "y",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "f",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "v",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "u",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "p",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "red",
+      "letter": "v",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "w",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "f",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "p",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "j",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "p",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "b",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "b",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "x",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "y",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "z",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "w",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "w",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "v",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "w",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "f",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "u",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "p",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "w",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "f",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "y",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "p",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "p",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "z",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "y",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "p",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "f",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "y",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "w",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "z",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "z",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "q",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "u",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "z",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "y",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "w",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "f",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "k",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "p",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "w",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "y",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "u",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "y",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "p",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "p",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "x",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "w",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "y",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "u",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "f",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "w",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "m",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "p",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "b",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "u",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "k",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "f",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "p",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "r",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "p",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "u",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "g",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "h",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "f",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "s",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "b",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "y",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "f",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "a",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": " ",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "i",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "n",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "v",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "l",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "u",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "t",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    }
+  ],
+  [
+    {
+      "color": "white",
+      "letter": "c",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "o",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "d",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "red",
+      "letter": "e",
+      "visible": false,
+      "element": null
+    },
+    {
+      "color": "white",
+      "letter": "x",
+      "visible": false,
+      "element": null
+    }
+  ]
+];
