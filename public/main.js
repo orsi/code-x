@@ -19,6 +19,7 @@ const TIME_TIL_FADEOUT_LETTER = 5000;
 let $codex;
 let $codexInstructions;
 let $enterButton;
+let $markSutherland;
 // let $infoButton;
 // let $infoExitButton;
 let $screenTitle;
@@ -45,15 +46,21 @@ function hideLetter(letter) {
       // letter
       const codexLetter = codexLine[j];
       if (codexLetter.letter === letter) {
-        codexLetter.element.style.opacity = 0;
+        fadeOutElement(codexLetter.element, 3000);
         codexLetter.visible = false;
       }
     }
   }
 }
 
-function fadeInElement($element, time) {
+function fadeInElement($element, time, callback) {
+  if ($element.classList.contains('fade-in')) {
+    // currently fading in
+    return;
+  }
+
   $element.style.opacity = 0;
+  $element.classList.add('fade-in');
 
   var last = +new Date();
   var tick = function() {
@@ -62,6 +69,13 @@ function fadeInElement($element, time) {
 
     if (+$element.style.opacity < 1) {
       (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 16);
+    } else {
+      $element.style.opacity = 1;
+      $element.classList.remove('fade-in');
+
+      if (callback) {
+        callback();
+      }
     }
   };
 
@@ -74,8 +88,14 @@ function fadeOutAllScreens() {
   }
 }
 
-function fadeOutElement($element, time) {
+function fadeOutElement($element, time, callback) {
+  if ($element.classList.contains('fade-out')) {
+    // currently fading out
+    return;
+  }
+
   $element.style.opacity = 1;
+  $element.classList.add('fade-out');
 
   var last = +new Date();
   var tick = function() {
@@ -84,6 +104,13 @@ function fadeOutElement($element, time) {
 
     if (+$element.style.opacity > 0) {
       (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 16);
+    } else {
+      $element.style.opacity = 0;
+      $element.classList.remove('fade-out');
+
+      if (callback) {
+        callback();
+      }
     }
   };
 
@@ -218,7 +245,6 @@ function onKeydown(ev) {
     } else if (keyCode === 27) {
       // escape
       transitionToTitleScreen();
-      resetCodex();
     }
 
     if (+$codexInstructions.style.opacity > 0) {
@@ -263,11 +289,12 @@ function onKeydown(ev) {
   }
 }
 
-function onDOMContentLoaded() {
+function initialize() {
   // select elements
   $codex = document.querySelector('#codex');
   $codexInstructions = document.querySelector('#codex-instructions');
   $enterButton = document.querySelector('#enter-button');
+  $markSutherland = document.querySelector('#mark-sutherland');
   // $infoButton = document.querySelector('#codex-info-button');
   // $infoExitButton = document.querySelector('#info-exit-button');
   $screenTitle = document.querySelector('#screen-title');
@@ -335,7 +362,6 @@ function onMouseMove(ev) {
 }
 
 function revealAll() {
-  console.log('reveal all');
   for (let i = 65; i <= 90; i++) {
     let letter = String.fromCharCode(i).toLowerCase();
     revealLetter(letter);
@@ -352,8 +378,10 @@ function revealLetter(letter) {
       const codexLetter = codexLine[j];
       if (codexLetter.letter === letter) {
         doPlayAudio = true;
-        codexLetter.element.style.opacity = 1;
-        codexLetter.visible = true;
+        if (codexLetter.visible === false) {
+          fadeInElement(codexLetter.element, 3000);
+          codexLetter.visible = true;
+        }
       }
     }
   }
@@ -370,7 +398,7 @@ function resetCodex() {
     for (let j = 0; j < codexLine.length; j++) {
       // letter
       const codexLetter = codexLine[j];
-      codexLetter.element.style.opacity = 0;
+      fadeOutElement(codexLetter.element, 10);
       codexLetter.visible = false;
     }
   }
@@ -418,7 +446,6 @@ function playLetterAudio(letter) {
 }
 
 function setCurrentState(state, $element) {
-  resetCodex();
   previousState = currentState;
   currentState = state;
   for (let i = 0; i < SCREENS.length; i++) {
@@ -427,6 +454,7 @@ function setCurrentState(state, $element) {
   $element.classList.add('current-state');
   fadeOutAllScreens();
   fadeInElement($element, 1000);
+  resetCodex();
 }
 
 function transitionToAutoScreen() {
@@ -460,6 +488,17 @@ function transitionToInteractiveScreen() {
 
 function transitionToTitleScreen() {
   setCurrentState(STATE.TITLE, $screenTitle);
+
+  if ($enterButton.classList.contains('d-none')) {
+    // delay and hide mark sutherland and show enter
+    setTimeout(function () {
+      fadeOutElement($markSutherland, 1000, function () {
+        $markSutherland.parentNode.removeChild($markSutherland);
+        $enterButton.classList.remove('d-none');
+        fadeInElement($enterButton, 1000);
+      });
+    }, 1500);
+  }
 }
 
 function update() {
@@ -503,7 +542,7 @@ function updateAuto() {
 }
 
 // on load
-document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
+document.addEventListener('DOMContentLoaded', initialize);
 
 /** MAIN CODEX META OBJECT */
 const codex = [
