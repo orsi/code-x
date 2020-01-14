@@ -1,11 +1,11 @@
 const AUDIO_CONTEXT = new (window.AudioContext || window.webkitAudioContext)();
 const AUDIO_GAIN_NODE = AUDIO_CONTEXT.createGain();
-const AUDIO_FILES = {};
+const AUDIO_LETTER_BUFFERS = {};
 const FADEOUT_LETTERS_INTERVALS = {};
 const MAX_FADEOUT_LETTER_TIME = 8000;
 const MIN_FADEOUT_LETTER_TIME = 5000;
-const MAX_NEXT_UPDATE_AUTO_TIME = 4000;
-const MIN_NEXT_UPDATE_AUTO_TIME = 1000;
+const MAX_NEXT_AUTO_UPDATE_TIME = 2000;
+const MIN_NEXT_AUTO_UPDATE_TIME = 1000;
 const RESOURCE_PATH = '/res/';
 const STATE = {
   TITLE: 0,
@@ -31,6 +31,10 @@ let isMobileAudioEnabled = false;
 let lastKeypressTime;
 let lastUpdateTime;
 let lastUpdateAutoTime;
+let lettersLoaded = 0;
+let maxNextAutoUpdateTime = 4000;
+let minNextAutoUpdateTime = 1000;
+let totalLetters = 26;
 let nextUpdateAutoTime;
 let previousState;
 
@@ -141,8 +145,8 @@ function getRandomKeyCode() {
 
 function getNextUpdateAutoTime() {
   const nextTime = Math.floor(
-    Math.random() * (MAX_NEXT_UPDATE_AUTO_TIME - MIN_NEXT_UPDATE_AUTO_TIME)
-  ) + MIN_NEXT_UPDATE_AUTO_TIME;
+    Math.random() * (maxNextAutoUpdateTime - minNextAutoUpdateTime)
+  ) + minNextAutoUpdateTime;
   return nextTime;
 }
 
@@ -172,106 +176,15 @@ function generateCodexHtml(container) {
   }
 }
 
-function loadAudioFiles() {
-  for (i = 0; i < 26; i++) {
-    const letter = String.fromCharCode(97 + i);
-    AUDIO_FILES[letter] = new Audio(`${RESOURCE_PATH}${letter.toUpperCase()}.mp3`);
-  }
-}
-
-function onClickEnterButton(ev) {
-  if (isMobile) {
-    onClickVolumeButton();
-    transitionToAutoScreen();
-  } else {
-    transitionToInteractiveScreen();
-  }
-}
-
-function onClickVolumeButton(ev) {
-  if (isAudioMuted) {
-    fadeGain(1, .5);
-    isAudioMuted = false;
-    // change font-awesome icon
-    const $icon = $volumeButton.querySelector('i');
-    $icon.classList.remove('fa-volume-mute');
-    $icon.classList.add('fa-volume-up');
-  } else {
-    fadeGain(0, .5);
-    isAudioMuted = true;
-    // change font-awesome icon
-    const $icon = $volumeButton.querySelector('i');
-    $icon.classList.remove('fa-volume-up');
-    $icon.classList.add('fa-volume-mute');
-  }
-}
-
-function onKeydown(ev) {
-  lastKeypressTime = new Date().getTime();
-
-  // get character code depending on browser compatibility
-  let keyCode;
-  if (ev.which || ev.keyCode || ev.charCode) {
-    keyCode = ev.which || ev.keyCode || ev.charCode;
-  }
-
-  if (currentState === STATE.INTERACTIVE) {
-    if (keyCode >= 65 && keyCode <= 90) {
-      // upper case letters
-      const letter = String.fromCharCode(keyCode).toLowerCase();
-      revealLetter(letter);
-    } else if (keyCode >= 97 && keyCode <= 122) {
-      // lower case letters
-      const letter = String.fromCharCode(keyCode);
-      revealLetter(letter);
-    } else if (keyCode === 32) {
-      // space
-      resetCodex();
-    } else if (keyCode === 27) {
-      // escape
-      transitionToTitleScreen();
-    }
-
-    if (+$codexInstructions.style.opacity > 0) {
-      fadeOutElement($codexInstructions, 1000);
-    }
-  } else if (currentState === STATE.AUTO) {
-    if (keyCode >= 65 && keyCode <= 90) {
-      // upper case letters
-      resetCodex();
-      transitionToInteractiveScreen();
-
-      const letter = String.fromCharCode(keyCode).toLowerCase();
-      revealLetter(letter);
-    } else if (keyCode >= 97 && keyCode <= 122) {
-      // lower case letters
-      resetCodex();
-      transitionToInteractiveScreen();
-
-      const letter = String.fromCharCode(keyCode);
-      revealLetter(letter);
-    } else if (keyCode === 32) {
-      // space
-      resetCodex();
-      transitionToInteractiveScreen();
-    } else if (keyCode === 27) {
-      // escape
-      resetCodex();
-      transitionToTitleScreen();
-    }
-    nextUpdateAutoTime = 0;
-  } else if (currentState === STATE.TITLE) {
-    if (keyCode === 'D'.charCodeAt(0)) {
-      // upper case letters
-      transitionToDebugScreen();
-    }
-  } else if (currentState === STATE.DEBUG) {
-    if (keyCode === 27) {
-      // escape
-      resetCodex();
-      transitionToTitleScreen();
-    }
-  }
+function getNormalizedDistance(min, max) {
+  const clientX = lastMouseEvent.clientX;
+  const clientY = lastMouseEvent.clientY;
+  const windowHeight = window.innerHeight;
+  const windowWidth = window.innerWidth;
+  const midHeight = windowHeight / 2;
+  const distanceFromMidHeight = midHeight - clientY;
+  const normalizedDistance = (max - min) * ((distanceFromMidHeight - (-midHeight)) / (midHeight - (-midHeight))) + min;
+  return normalizedDistance;
 }
 
 function initialize() {
@@ -322,32 +235,149 @@ function initialize() {
   transitionToTitleScreen();
 }
 
-function onMouseMove(ev) {
-  if (currentState === STATE.AUTO) {
-    const clientX = ev.clientX;
-    const clientY = ev.clientY;
-    const windowHeight = window.innerHeight;
-    const windowWidth = window.innerWidth;
-
-    const midHeight = windowHeight / 2;
-    const distanceFromMidHeight = midHeight - clientY;
-    const normalizeDistance = (2 - 0.25) * ((distanceFromMidHeight - (-midHeight)) / (midHeight - (-midHeight))) + 0.25;
-    let playbackRate = normalizeDistance;
-
-    for (let i = 0; i < currentAudio.length; i++) {
-      currentAudio[i].playbackRate.value = playbackRate;
+function loadAudioFiles() {
+  for (i = 0; i < 26; i++) {
+    const letter = String.fromCharCode(97 + i);
+    AUDIO_LETTER_BUFFERS[letter] = AUDIO_CONTEXT.createBufferSource();
+    let request = new XMLHttpRequest();
+    request.open('GET', `${RESOURCE_PATH}${letter.toUpperCase()}.mp3`, true);
+    request.responseType = 'arraybuffer';
+    request.onreadystatechange = function() {
+      if (request.readyState == XMLHttpRequest.DONE) {
+        AUDIO_CONTEXT.decodeAudioData(
+          request.response,
+          function (buffer) {
+            AUDIO_LETTER_BUFFERS[letter].buffer = buffer;
+            AUDIO_LETTER_BUFFERS[letter].loop = false;
+            lettersLoaded++;
+          },
+          function (e) {
+            console.log("Error with decoding audio data" + e.err);
+          }
+        );
+      }
     }
+    request.send();
+  }
+}
+
+function onClickEnterButton(ev) {
+  if (isMobile) {
+    onClickVolumeButton();
+    transitionToAutoScreen();
+  } else {
+    transitionToInteractiveScreen();
+  }
+}
+
+function onClickVolumeButton(ev) {
+  if (isAudioMuted) {
+    fadeGain(1, .5);
+    isAudioMuted = false;
+    // change font-awesome icon
+    const $icon = $volumeButton.querySelector('i');
+    $icon.classList.remove('fa-volume-mute');
+    $icon.classList.add('fa-volume-up');
+  } else {
+    fadeGain(0, .5);
+    isAudioMuted = true;
+    // change font-awesome icon
+    const $icon = $volumeButton.querySelector('i');
+    $icon.classList.remove('fa-volume-up');
+    $icon.classList.add('fa-volume-mute');
+  }
+}
+
+function onKeydown(ev) {
+  lastKeypressTime = new Date().getTime();
+
+  // get character code depending on browser compatibility
+  let keyCode;
+  if (ev.which || ev.keyCode || ev.charCode) {
+    keyCode = ev.which || ev.keyCode || ev.charCode;
+  }
+
+  if (currentState === STATE.INTERACTIVE) {
+    if (keyCode >= 65 && keyCode <= 90) {
+      // upper case letters
+      const letter = String.fromCharCode(keyCode).toLowerCase();
+      showLetter(letter);
+    } else if (keyCode >= 97 && keyCode <= 122) {
+      // lower case letters
+      const letter = String.fromCharCode(keyCode);
+      showLetter(letter);
+    } else if (keyCode === 32) {
+      // space
+      resetCodex();
+    } else if (keyCode === 27) {
+      // escape
+      transitionToTitleScreen();
+    }
+
+    if (+$codexInstructions.style.opacity > 0) {
+      fadeOutElement($codexInstructions, 1000);
+    }
+  } else if (currentState === STATE.AUTO) {
+    if (keyCode >= 65 && keyCode <= 90) {
+      // upper case letters
+      resetCodex();
+      transitionToInteractiveScreen();
+
+      const letter = String.fromCharCode(keyCode).toLowerCase();
+      showLetter(letter);
+    } else if (keyCode >= 97 && keyCode <= 122) {
+      // lower case letters
+      resetCodex();
+      transitionToInteractiveScreen();
+
+      const letter = String.fromCharCode(keyCode);
+      showLetter(letter);
+    } else if (keyCode === 32) {
+      // space
+      resetCodex();
+      transitionToInteractiveScreen();
+    } else if (keyCode === 27) {
+      // escape
+      resetCodex();
+      transitionToTitleScreen();
+    }
+    nextUpdateAutoTime = 0;
+  } else if (currentState === STATE.TITLE) {
+    if (keyCode === 'D'.charCodeAt(0)) {
+      // upper case letters
+      transitionToDebugScreen();
+    }
+  } else if (currentState === STATE.DEBUG) {
+    if (keyCode === 27) {
+      // escape
+      resetCodex();
+      transitionToTitleScreen();
+    }
+  }
+}
+
+function onMouseMove(ev) {
+  lastMouseEvent = ev;
+  if (currentState === STATE.AUTO) {
+    let distanceRatio = getNormalizedDistance(0.25, 2);
+    for (let i = 0; i < currentAudio.length; i++) {
+      currentAudio[i].playbackRate.value = distanceRatio;
+    }
+
+    // modify letter updates according to distance from center ratio
+    maxNextAutoUpdateTime = MAX_NEXT_AUTO_UPDATE_TIME / distanceRatio;
+    minNextAutoUpdateTime = MIN_NEXT_AUTO_UPDATE_TIME / distanceRatio;
   }
 }
 
 function revealAll() {
   for (let i = 65; i <= 90; i++) {
     let letter = String.fromCharCode(i).toLowerCase();
-    revealLetter(letter);
+    showLetter(letter);
   }
 }
 
-function revealLetter(letter) {
+function showLetter(letter) {
   let doPlayAudio = false;
   for (let i = 0; i < codex.length; i++) {
     // line
@@ -365,7 +395,12 @@ function revealLetter(letter) {
     }
   }
   if (doPlayAudio) {
-    playLetterAudio(letter);
+    if (currentState === STATE.INTERACTIVE) {
+      playLetterAudio(letter);
+    } else if (currentState === STATE.AUTO) {
+      const playbackRate = getNormalizedDistance(0.25, 2);
+      playLetterAudio(letter, playbackRate);
+    }
   }
 }
 
@@ -397,31 +432,32 @@ function resetCodex() {
   }, 2100);
 }
 
-function playLetterAudio(letter) {
-  const $letterAudio = AUDIO_FILES[letter];
-  if ($letterAudio === undefined) {
+function playAudio(source, playbackRate) {
+  const cloneSource = AUDIO_CONTEXT.createBufferSource();
+  cloneSource.buffer = source.buffer;
+  cloneSource.playbackRate.value = playbackRate || 1;
+  currentAudio.push(cloneSource);
+  cloneSource.connect(AUDIO_GAIN_NODE);
+  cloneSource.onended = function () {
+    if(this.stop) {
+      this.stop(); 
+    }
+    if(this.disconnect) {
+      this.disconnect();
+    }
+    currentAudio = currentAudio.filter(function (currentAudio) {
+      return currentAudio !== cloneSource;
+    });
+  }
+  cloneSource.start(0);
+}
+
+function playLetterAudio(letter, playbackRate) {
+  const audioBufferSource = AUDIO_LETTER_BUFFERS[letter];
+  if (audioBufferSource === undefined) {
     return;
   }
-  var source = AUDIO_CONTEXT.createBufferSource();
-  currentAudio.push(source);
-  var request = new XMLHttpRequest();
-  request.open('GET', $letterAudio.src, true);
-  request.responseType = 'arraybuffer';
-  request.onload = function () {
-    AUDIO_CONTEXT.decodeAudioData(
-      request.response,
-      function (buffer) {
-        source.buffer = buffer;
-        source.connect(AUDIO_GAIN_NODE);
-        source.loop = false;
-        source.start(0);
-      },
-      function (e) {
-        console.log("Error with decoding audio data" + e.err);
-      }
-    );
-  }
-  request.send()
+  playAudio(audioBufferSource, playbackRate);
 }
 
 function setCurrentState(state, $element) {
@@ -505,7 +541,7 @@ function update() {
 function updateAuto() {
   const keyCode = getRandomKeyCode();
   const letter = String.fromCharCode(keyCode).toLowerCase();
-  revealLetter(letter);
+  showLetter(letter);
 
   // fade out letter
   setTimeout(function () {
