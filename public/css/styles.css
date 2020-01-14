@@ -24,6 +24,7 @@ button {
     position: relative;
     min-height: 100vh;
     min-width: 100vw;
+    overflow: hidden;
 }
 .current-state {
     pointer-events: all !important;
@@ -119,9 +120,6 @@ button {
     display: inline-block;
     width: 100%;	
 }
-/* #codex .letter {
-    transition: opacity 3s ease-in;
-} */
 #codex-instructions {
     text-align: center;
     padding: 8px;
@@ -132,47 +130,3 @@ button {
     padding: 16px;
     position: fixed;
 }
-/* 
-#screen-info {
-    box-sizing: border-box;
-    font-size: 16px;
-    margin: 0 auto;
-    max-height: 100vh;
-    max-width: 560px;
-    padding: 16px;
-    position: relative;
-    text-align: left;
-    overflow: auto;
-}
-#screen-info h4 {
-    margin: 16px 0 0 0;
-}
-#screen-info p {
-    margin: 16px 0 0 0;
-}
-#screen-info p:last-of-type {
-    margin-bottom: 32px;
-}
-#info-exit-button {
-    position: sticky;
-    top: 16px;
-    float: right;
-} */
-
-/* transitions */
-/* .fade-in {
-    opacity: 0;
-    visibility: visible;
-}
-.fading-in {
-    opacity: 1;
-    transition: opacity .2s ease-in;
-}
-.fade-out {
-    opacity: 1;
-    visibility: visible;
-}
-.fading-out {
-    opacity: 0;
-    transition: opacity .2s ease-in;
-} */

@@ -20,11 +20,8 @@ let $codex;
 let $codexInstructions;
 let $enterButton;
 let $markSutherland;
-// let $infoButton;
-// let $infoExitButton;
 let $screenTitle;
 let $screenCodex;
-// let $screenInfo;
 let $volumeButton;
 let currentAudio = [];
 let currentState;
@@ -191,18 +188,6 @@ function onClickEnterButton(ev) {
   }
 }
 
-// function onClickInfoButton(ev) {
-//   transitionToInfoScreen();
-// }
-
-// function onClickInfoExitButton(ev) {
-//   if (isMobile) {
-//     transitionToAutoScreen();
-//   } else {
-//     transitionToInteractiveScreen();
-//   }
-// }
-
 function onClickVolumeButton(ev) {
   if (isAudioMuted) {
     fadeGain(1, .5);
@@ -295,23 +280,17 @@ function initialize() {
   $codexInstructions = document.querySelector('#codex-instructions');
   $enterButton = document.querySelector('#enter-button');
   $markSutherland = document.querySelector('#mark-sutherland');
-  // $infoButton = document.querySelector('#codex-info-button');
-  // $infoExitButton = document.querySelector('#info-exit-button');
   $screenTitle = document.querySelector('#screen-title');
   $screenCodex = document.querySelector('#screen-codex');
-  // $screenInfo = document.querySelector('#screen-info');
   $volumeButton = document.querySelector('#codex-volume-button');
 
   SCREENS.push($screenTitle);
   SCREENS.push($screenCodex);
-  // SCREENS.push($screenInfo);
 
   // setup events
   document.addEventListener('keydown', onKeydown);
   document.addEventListener('mousemove', onMouseMove);
   $enterButton.addEventListener('click', onClickEnterButton);
-  // $infoButton.addEventListener('click', onClickInfoButton);
-  // $infoExitButton.addEventListener('click', onClickInfoExitButton);
   $volumeButton.addEventListener('click', onClickVolumeButton);
 
   // connect gain to audio context
@@ -465,10 +444,6 @@ function transitionToAutoScreen() {
   nextUpdateAutoTime = 0;
   update();
 }
-
-// function transitionToInfoScreen() {
-//   setCurrentState(STATE.INFO, $screenInfo);
-// }
 
 function transitionToDebugScreen() {
   setCurrentState(STATE.DEBUG, $screenCodex);
