@@ -13,29 +13,32 @@ const STATE = {
   AUTO: 2,
   DEBUG: 3
 };
-const SCREENS = [];
 const TIME_TIL_AUTO = 10000;
 const TIME_TIL_FADEOUT_LETTER = 5000;
 let $codex;
 let $codexInstructions;
 let $enterButton;
 let $markSutherland;
+let $redBar;
 let $screenTitle;
 let $screenCodex;
 let $volumeButton;
 let currentAudio = [];
 let currentState;
+let isInitialized = false;
+let isAudioLoaded = false;
 let isAudioMuted = false;
 let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 let isMobileAudioEnabled = false;
-let lastKeypressTime;
-let lastUpdateTime;
-let lastUpdateAutoTime;
+let lastKeypressTime = new Date().getTime();
+let lastUpdateTime = new Date().getTime();
+let lastUpdateAutoTime = new Date().getTime();
 let lettersLoaded = 0;
+let letterTimeouts = [];
 let maxNextAutoUpdateTime = 4000;
 let minNextAutoUpdateTime = 1000;
 let totalLetters = 26;
-let nextUpdateAutoTime;
+let nextUpdateAutoTime = 0;
 let previousState;
 
 function hideLetter(letter) {
@@ -60,15 +63,21 @@ function fadeInElement($element, time, callback) {
     return;
   }
 
+  if (time === undefined) {
+    time = 300;
+  }
+
   $element.style.opacity = 0;
   $element.classList.add('fade-in');
 
-  var last = +new Date();
+  var last = new Date().getTime();
   var tick = function() {
-    $element.style.opacity = +$element.style.opacity + (new Date() - last) / time;
-    last = +new Date();
+    const now = new Date().getTime();
+    const opacity = parseFloat($element.style.opacity) + (now - last) / time;
+    $element.style.opacity = opacity;
+    last = now;
 
-    if (+$element.style.opacity < 1) {
+    if (opacity < 1) {
       (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 16);
     } else {
       $element.style.opacity = 1;
@@ -83,11 +92,6 @@ function fadeInElement($element, time, callback) {
   tick();
 }
 
-function fadeOutAllScreens() {
-  for (let i = 0; i < SCREENS.length; i++) {
-    fadeOutElement(SCREENS[i], 1000);
-  }
-}
 
 function fadeOutElement($element, time, callback) {
   if ($element.classList.contains('fade-out')) {
@@ -95,15 +99,22 @@ function fadeOutElement($element, time, callback) {
     return;
   }
 
+  // set defaults
+  if (time === undefined) {
+    time = 300;
+  }
+
   $element.style.opacity = 1;
   $element.classList.add('fade-out');
 
-  var last = +new Date();
-  var tick = function() {
-    $element.style.opacity = +$element.style.opacity - (new Date() - last) / time;
-    last = +new Date();
+  let lastUpdate = new Date().getTime();
+  const tick = function() {
+    const now = new Date().getTime();
+    const opacity = parseFloat($element.style.opacity) - (now - lastUpdate) / time;
+    $element.style.opacity = opacity;
+    lastUpdate = now;
 
-    if (+$element.style.opacity > 0) {
+    if (opacity > 0) {
       (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 16);
     } else {
       $element.style.opacity = 0;
@@ -119,6 +130,10 @@ function fadeOutElement($element, time, callback) {
 }
 
 function fadeGain(value, seconds) {
+  if (seconds === undefined) {
+    seconds = .1;
+  }
+
   // cancel any current schedules
   AUDIO_GAIN_NODE.gain.cancelScheduledValues(AUDIO_CONTEXT.currentTime);
   // set checkpoint
@@ -127,7 +142,7 @@ function fadeGain(value, seconds) {
   AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(value, AUDIO_CONTEXT.currentTime + seconds);
 }
 
-function getFadeoutLetterTime() {
+function getDelayFadeoutLetterTime() {
   const nextTime = Math.floor(
     Math.random() * (MAX_FADEOUT_LETTER_TIME - MIN_FADEOUT_LETTER_TIME)
   ) + MIN_FADEOUT_LETTER_TIME;
@@ -192,13 +207,11 @@ function initialize() {
   $codex = document.querySelector('#codex');
   $codexInstructions = document.querySelector('#codex-instructions');
   $enterButton = document.querySelector('#enter-button');
+  $redBar = document.querySelector('#red-bar');
   $markSutherland = document.querySelector('#mark-sutherland');
   $screenTitle = document.querySelector('#screen-title');
   $screenCodex = document.querySelector('#screen-codex');
   $volumeButton = document.querySelector('#codex-volume-button');
-
-  SCREENS.push($screenTitle);
-  SCREENS.push($screenCodex);
 
   // setup events
   document.addEventListener('keydown', onKeydown);
@@ -223,6 +236,7 @@ function initialize() {
       }, 0);
     };
     document.body.addEventListener('touchend', resume, false);
+
   }
 
   // load audio
@@ -232,7 +246,10 @@ function initialize() {
   generateCodexHtml($codex);
 
   // initialize title screen
-  transitionToTitleScreen();
+  setCurrentState(STATE.TITLE, $screenTitle);
+
+  // start update
+  update();
 }
 
 function loadAudioFiles() {
@@ -250,6 +267,10 @@ function loadAudioFiles() {
             AUDIO_LETTER_BUFFERS[letter].buffer = buffer;
             AUDIO_LETTER_BUFFERS[letter].loop = false;
             lettersLoaded++;
+
+            if (lettersLoaded == totalLetters) {
+              isAudioLoaded = true;
+            }
           },
           function (e) {
             console.log("Error with decoding audio data" + e.err);
@@ -264,9 +285,9 @@ function loadAudioFiles() {
 function onClickEnterButton(ev) {
   if (isMobile) {
     onClickVolumeButton();
-    transitionToAutoScreen();
+    transition(STATE.TITLE, STATE.AUTO);
   } else {
-    transitionToInteractiveScreen();
+    transition(STATE.TITLE, STATE.INTERACTIVE);
   }
 }
 
@@ -311,47 +332,27 @@ function onKeydown(ev) {
       resetCodex();
     } else if (keyCode === 27) {
       // escape
-      transitionToTitleScreen();
+      transition(STATE.INTERACTIVE, STATE.TITLE);
     }
 
-    if (+$codexInstructions.style.opacity > 0) {
-      fadeOutElement($codexInstructions, 1000);
+    // ensure instructions are hidden on first keypress
+    if ($codexInstructions.classList.contains('fade-out') === false &&
+      $codexInstructions.classList.contains('hidden') === false) {
+      fadeOutElement($codexInstructions, 1000, function () {
+        $codexInstructions.classList.add('hidden');
+      });
     }
   } else if (currentState === STATE.AUTO) {
-    if (keyCode >= 65 && keyCode <= 90) {
-      // upper case letters
-      resetCodex();
-      transitionToInteractiveScreen();
-
-      const letter = String.fromCharCode(keyCode).toLowerCase();
-      showLetter(letter);
-    } else if (keyCode >= 97 && keyCode <= 122) {
-      // lower case letters
-      resetCodex();
-      transitionToInteractiveScreen();
-
-      const letter = String.fromCharCode(keyCode);
-      showLetter(letter);
-    } else if (keyCode === 32) {
-      // space
-      resetCodex();
-      transitionToInteractiveScreen();
-    } else if (keyCode === 27) {
-      // escape
-      resetCodex();
-      transitionToTitleScreen();
-    }
-    nextUpdateAutoTime = 0;
+    transition(STATE.AUTO, STATE.TITLE);
   } else if (currentState === STATE.TITLE) {
     if (keyCode === 'D'.charCodeAt(0)) {
       // upper case letters
-      transitionToDebugScreen();
+      transition(STATE.TITLE, STATE.DEBUG);
     }
   } else if (currentState === STATE.DEBUG) {
     if (keyCode === 27) {
       // escape
-      resetCodex();
-      transitionToTitleScreen();
+      transition(STATE.DEBUG, STATE.TITLE);
     }
   }
 }
@@ -368,68 +369,6 @@ function onMouseMove(ev) {
     maxNextAutoUpdateTime = MAX_NEXT_AUTO_UPDATE_TIME / distanceRatio;
     minNextAutoUpdateTime = MIN_NEXT_AUTO_UPDATE_TIME / distanceRatio;
   }
-}
-
-function revealAll() {
-  for (let i = 65; i <= 90; i++) {
-    let letter = String.fromCharCode(i).toLowerCase();
-    showLetter(letter);
-  }
-}
-
-function showLetter(letter) {
-  let doPlayAudio = false;
-  for (let i = 0; i < codex.length; i++) {
-    // line
-    const codexLine = codex[i];
-    for (let j = 0; j < codexLine.length; j++) {
-      // letter
-      const codexLetter = codexLine[j];
-      if (codexLetter.letter === letter) {
-        doPlayAudio = true;
-        if (codexLetter.visible === false) {
-          fadeInElement(codexLetter.element, 3000);
-          codexLetter.visible = true;
-        }
-      }
-    }
-  }
-  if (doPlayAudio) {
-    if (currentState === STATE.INTERACTIVE) {
-      playLetterAudio(letter);
-    } else if (currentState === STATE.AUTO) {
-      const playbackRate = getNormalizedDistance(0.25, 2);
-      playLetterAudio(letter, playbackRate);
-    }
-  }
-}
-
-function resetCodex() {
-  // reset all visiblity in codex object
-  for (let i = 0; i < codex.length; i++) {
-    // line
-    const codexLine = codex[i];
-    for (let j = 0; j < codexLine.length; j++) {
-      // letter
-      const codexLetter = codexLine[j];
-      fadeOutElement(codexLetter.element, 10);
-      codexLetter.visible = false;
-    }
-  }
-
-  // fade out all playing audio and stop
-  fadeGain(0, .5);
-  setTimeout(function () {
-    for (let i = 0; i < currentAudio.length; i++) {
-      const audioSource = currentAudio[i];
-      audioSource.disconnect();
-    }
-    // reset gain if not muted
-    if (isAudioMuted === false) {
-      fadeGain(1, .5);
-    }
-    currentAudio = [];
-  }, 2100);
 }
 
 function playAudio(source, playbackRate) {
@@ -460,55 +399,119 @@ function playLetterAudio(letter, playbackRate) {
   playAudio(audioBufferSource, playbackRate);
 }
 
+function resetCodex() {
+  // reset all visiblity in codex object
+  for (let i = 0; i < codex.length; i++) {
+    // line
+    const codexLine = codex[i];
+    for (let j = 0; j < codexLine.length; j++) {
+      // letter
+      const codexLetter = codexLine[j];
+      codexLetter.element.style.opacity = 0;
+      codexLetter.visible = false;
+    }
+  }
+
+  // disconnect all playing audio
+  for (let i = 0; i < currentAudio.length; i++) {
+    const audioSource = currentAudio[i];
+    audioSource.disconnect();
+  }
+  currentAudio = [];
+}
+
+function revealAll() {
+  for (let i = 65; i <= 90; i++) {
+    let letter = String.fromCharCode(i).toLowerCase();
+    showLetter(letter);
+  }
+}
+
+function showLetter(letter) {
+  let shouldPlayAudio = false;
+  for (let i = 0; i < codex.length; i++) {
+    // line
+    const codexLine = codex[i];
+    for (let j = 0; j < codexLine.length; j++) {
+      // letter
+      const codexLetter = codexLine[j];
+      if (codexLetter.letter === letter) {
+        shouldPlayAudio = true;
+        if (codexLetter.visible === false) {
+          fadeInElement(codexLetter.element, 3000);
+          codexLetter.visible = true;
+        }
+      }
+    }
+  }
+
+  if (shouldPlayAudio) {
+    if (currentState === STATE.INTERACTIVE) {
+      playLetterAudio(letter);
+    } else if (currentState === STATE.AUTO) {
+      const playbackRate = getNormalizedDistance(0.25, 2);
+      playLetterAudio(letter, playbackRate);
+    }
+  }
+}
+
 function setCurrentState(state, $element) {
   previousState = currentState;
   currentState = state;
-  for (let i = 0; i < SCREENS.length; i++) {
-    SCREENS[i].classList.remove('current-state');
+  const $currentStateElement = document.querySelector('.current-state');
+  if ($currentStateElement !== null) {
+    $currentStateElement.classList.remove('current-state');
   }
   $element.classList.add('current-state');
-  fadeOutAllScreens();
-  fadeInElement($element, 1000);
-  resetCodex();
 }
 
-function transitionToAutoScreen() {
-  setCurrentState(STATE.AUTO, $screenCodex);
-  // fade out instructions
-  fadeOutElement($codexInstructions, 1000);
-  lastUpdateAutoTime = new Date().getTime();
-  nextUpdateAutoTime = 0;
-  update();
-}
+function transition(from, to) {
+  if (from === STATE.TITLE) {
+    fadeOutElement($screenTitle);
 
-function transitionToDebugScreen() {
-  setCurrentState(STATE.DEBUG, $screenCodex);
-  revealAll();
-}
+    if (to === STATE.INTERACTIVE) {
+      fadeGain(1);
+      resetCodex();
+      lastKeypressTime = new Date().getTime(); // resets timer to auto
+      setCurrentState(STATE.INTERACTIVE, $screenCodex);
+      fadeInElement($screenCodex);
+    } else if (to === STATE.DEBUG) {
+      setCurrentState(STATE.DEBUG, $screenCodex);
+      fadeInElement($screenCodex);
+      revealAll();
+    }
 
-function transitionToInteractiveScreen() {
-  setCurrentState(STATE.INTERACTIVE, $screenCodex);
-  // don't show instructions again if last state
-  // was AUTO
-  if (previousState !== STATE.AUTO) {
-    fadeInElement($codexInstructions, 1000);
-  }
-  lastUpdateTime = lastKeypressTime = new Date().getTime();
-  update();
-}
+  } else if (from === STATE.DEBUG) {
 
-function transitionToTitleScreen() {
-  setCurrentState(STATE.TITLE, $screenTitle);
+    if (to === STATE.TITLE) {
+      fadeOutElement($screenCodex);
+      setCurrentState(STATE.TITLE, $screenCodex);
+      fadeInElement($screenTitle);
+    } 
 
-  if ($enterButton.classList.contains('d-none')) {
-    // delay and hide mark sutherland and show enter
-    setTimeout(function () {
-      fadeOutElement($markSutherland, 1000, function () {
-        $markSutherland.parentNode.removeChild($markSutherland);
-        $enterButton.classList.remove('d-none');
-        fadeInElement($enterButton, 1000);
-      });
-    }, 1500);
+  } else if (from === STATE.INTERACTIVE) {
+
+    if (to === STATE.TITLE) {
+      setCurrentState(STATE.TITLE, $screenTitle);
+      fadeOutElement($screenCodex);
+      fadeInElement($screenTitle);
+      fadeGain(0);
+    } else if (to === STATE.AUTO) {
+      setCurrentState(STATE.AUTO, $screenCodex);
+      resetCodex();
+      if ($codexInstructions.classList.contains('hidden') === false) {
+        fadeOutElement($codexInstructions, 1000);
+      }
+      fadeInElement($screenTitle, 1000);
+    }
+
+  } else if (from === STATE.AUTO) {
+    if (to === STATE.TITLE) {
+      setCurrentState(STATE.TITLE, $screenTitle);
+      fadeOutElement($screenCodex);
+      fadeInElement($screenTitle);
+      fadeGain(0);
+    }
   }
 }
 
@@ -516,40 +519,49 @@ function update() {
   const now = new Date().getTime();
   const delta = now - lastUpdateTime;
   lastUpdateTime = now;
+  
+  if (currentState === STATE.TITLE) {
+    if (!isAudioLoaded && !isInitialized) {
+      const width = lettersLoaded / totalLetters * window.outerWidth;
+      $redBar.style.width =  width + 'px';
+    } else if (isAudioLoaded && !isInitialized) {
+      // delay and hide mark sutherland, progress bar and show enter
+      setTimeout(function () {
+        fadeOutElement($markSutherland, 1000, function () {
+          $markSutherland.parentNode.removeChild($markSutherland);
+          fadeInElement($enterButton, 1000);
+        });
+      }, 1500);
+      isInitialized = true;
+    }
+  }
 
   // switch to auto state when a key hasn't been pressed
   // in 10 seconds
   if (currentState === STATE.INTERACTIVE &&
     now - lastKeypressTime > TIME_TIL_AUTO
   ) {
-    transitionToAutoScreen();
+    transition(STATE.INTERACTIVE, STATE.AUTO);
   }
 
   if (currentState === STATE.AUTO &&
     lastUpdateTime - lastUpdateAutoTime > nextUpdateAutoTime
   ) {
-    updateAuto();
+    const keyCode = getRandomKeyCode();
+    const letter = String.fromCharCode(keyCode).toLowerCase();
+    showLetter(letter);
+
+    // fade out letter
+    setTimeout(function () {
+      hideLetter(letter);
+    }, getDelayFadeoutLetterTime());
+
+    // randomly reveal a letter every 2-6 seconds
+    nextUpdateAutoTime = getNextUpdateAutoTime();
     lastUpdateAutoTime = now;
   }
 
-  // if we're still in interactive or auto mode, keep updating
-  if (currentState === STATE.INTERACTIVE || currentState === STATE.AUTO) {
-    requestAnimationFrame(update);
-  }
-}
-
-function updateAuto() {
-  const keyCode = getRandomKeyCode();
-  const letter = String.fromCharCode(keyCode).toLowerCase();
-  showLetter(letter);
-
-  // fade out letter
-  setTimeout(function () {
-    hideLetter(letter);
-  }, getFadeoutLetterTime());
-
-  // randomly reveal a letter every 2-6 seconds
-  nextUpdateAutoTime = getNextUpdateAutoTime();
+  requestAnimationFrame(update);
 }
 
 // on load
