@@ -616,6 +616,7 @@ function update() {
         fadeOutElement($markSutherland, 1000, function () {
           $markSutherland.parentNode.removeChild($markSutherland);
           fadeInElement($enterButton, 1000);
+          $enterButton.classList.remove('display-none');
         });
       }, 1500);
       isInitialized = true;
