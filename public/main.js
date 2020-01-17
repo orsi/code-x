@@ -25,6 +25,7 @@ let $screenCodex;
 let $volumeButton;
 let currentAudio = [];
 let currentState;
+let fadeTimeoutMap = {};
 let isInitialized = false;
 let isAudioLoaded = false;
 let isAudioMuted = false;
@@ -58,6 +59,8 @@ function hideLetter(letter) {
 }
 
 function fadeInElement($element, time, callback) {
+  const uuid = getUUID();
+
   if ($element.classList.contains('fade-in')) {
     // currently fading in
     return;
@@ -67,6 +70,8 @@ function fadeInElement($element, time, callback) {
     time = 300;
   }
 
+  // make sure style has an opacity
+  
   $element.style.opacity = 0;
   $element.classList.add('fade-in');
 
@@ -78,10 +83,12 @@ function fadeInElement($element, time, callback) {
     last = now;
 
     if (opacity < 1) {
-      (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 16);
+      fadeTimeoutMap[uuid] =  requestAnimationFrame(tick);
     } else {
       $element.style.opacity = 1;
       $element.classList.remove('fade-in');
+
+      delete fadeTimeoutMap[uuid];
 
       if (callback) {
         callback();
@@ -94,6 +101,7 @@ function fadeInElement($element, time, callback) {
 
 
 function fadeOutElement($element, time, callback) {
+  const uuid = getUUID();
   if ($element.classList.contains('fade-out')) {
     // currently fading out
     return;
@@ -104,7 +112,10 @@ function fadeOutElement($element, time, callback) {
     time = 300;
   }
 
-  $element.style.opacity = 1;
+  // make sure style has an opacity
+  if (!$element.style.opacity) {
+    $element.style.opacity = 1;
+  }
   $element.classList.add('fade-out');
 
   let lastUpdate = new Date().getTime();
@@ -115,10 +126,12 @@ function fadeOutElement($element, time, callback) {
     lastUpdate = now;
 
     if (opacity > 0) {
-      (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 16);
+      fadeTimeoutMap[uuid] = requestAnimationFrame(tick);
     } else {
       $element.style.opacity = 0;
       $element.classList.remove('fade-out');
+
+      delete fadeTimeoutMap[uuid];
 
       if (callback) {
         callback();
@@ -202,6 +215,25 @@ function getNormalizedDistance(min, max) {
   return normalizedDistance;
 }
 
+/**
+ * https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+ */
+function getUUID() { // Public Domain/MIT
+  var d = new Date().getTime(); //Timestamp
+  var d2 = (performance && performance.now && (performance.now()*1000)) || 0; //Time in microseconds since page-load or 0 if unsupported
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16; //random number between 0 and 16
+      if(d > 0){ //Use timestamp until depleted
+          r = (d + r)%16 | 0;
+          d = Math.floor(d/16);
+      } else { //Use microseconds since page-load if supported
+          r = (d2 + r)%16 | 0;
+          d2 = Math.floor(d2/16);
+      }
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
 function initialize() {
   // select elements
   $codex = document.querySelector('#codex');
@@ -236,14 +268,10 @@ function initialize() {
       }, 0);
     };
     document.body.addEventListener('touchend', resume, false);
-
   }
 
   // load audio
   loadAudioFiles();
-
-  // generate codex
-  generateCodexHtml($codex);
 
   // initialize title screen
   setCurrentState(STATE.TITLE, $screenTitle);
@@ -323,25 +351,42 @@ function onKeydown(ev) {
       // upper case letters
       const letter = String.fromCharCode(keyCode).toLowerCase();
       showLetter(letter);
+
+      // ensure instructions are hidden on first keypress
+      if ($codexInstructions.classList.contains('fade-out') === false &&
+        $codexInstructions.classList.contains('hidden') === false) {
+        fadeOutElement($codexInstructions, 1000, function () {
+          $codexInstructions.classList.add('hidden');
+        });
+      }
     } else if (keyCode >= 97 && keyCode <= 122) {
       // lower case letters
       const letter = String.fromCharCode(keyCode);
       showLetter(letter);
+
+      // ensure instructions are hidden on first keypress
+      if ($codexInstructions.classList.contains('fade-out') === false &&
+        $codexInstructions.classList.contains('hidden') === false) {
+        fadeOutElement($codexInstructions, 1000, function () {
+          $codexInstructions.classList.add('hidden');
+        });
+      }
     } else if (keyCode === 32) {
       // space
       resetCodex();
+
+      // ensure instructions are hidden on first keypress
+      if ($codexInstructions.classList.contains('fade-out') === false &&
+        $codexInstructions.classList.contains('hidden') === false) {
+        fadeOutElement($codexInstructions, 1000, function () {
+          $codexInstructions.classList.add('hidden');
+        });
+      }
     } else if (keyCode === 27) {
       // escape
       transition(STATE.INTERACTIVE, STATE.TITLE);
     }
 
-    // ensure instructions are hidden on first keypress
-    if ($codexInstructions.classList.contains('fade-out') === false &&
-      $codexInstructions.classList.contains('hidden') === false) {
-      fadeOutElement($codexInstructions, 1000, function () {
-        $codexInstructions.classList.add('hidden');
-      });
-    }
   } else if (currentState === STATE.AUTO) {
     transition(STATE.AUTO, STATE.TITLE);
   } else if (currentState === STATE.TITLE) {
@@ -400,24 +445,26 @@ function playLetterAudio(letter, playbackRate) {
 }
 
 function resetCodex() {
-  // reset all visiblity in codex object
-  for (let i = 0; i < codex.length; i++) {
-    // line
-    const codexLine = codex[i];
-    for (let j = 0; j < codexLine.length; j++) {
-      // letter
-      const codexLetter = codexLine[j];
-      codexLetter.element.style.opacity = 0;
-      codexLetter.visible = false;
-    }
-  }
-
   // disconnect all playing audio
   for (let i = 0; i < currentAudio.length; i++) {
     const audioSource = currentAudio[i];
     audioSource.disconnect();
   }
   currentAudio = [];
+
+  // reset all visibility in codex object
+  for (let i = 0; i < codex.length; i++) {
+    // line
+    const codexLine = codex[i];
+    for (let j = 0; j < codexLine.length; j++) {
+      // letter
+      const codexLetter = codexLine[j];
+      codexLetter.visible = false;
+    }
+  }
+
+  $codex.innerHTML = '';
+  generateCodexHtml($codex);
 }
 
 function revealAll() {
@@ -467,13 +514,14 @@ function setCurrentState(state, $element) {
 
 function transition(from, to) {
   if (from === STATE.TITLE) {
+    stopAllFades();
     fadeOutElement($screenTitle);
 
     if (to === STATE.INTERACTIVE) {
-      fadeGain(1);
-      resetCodex();
-      lastKeypressTime = new Date().getTime(); // resets timer to auto
       setCurrentState(STATE.INTERACTIVE, $screenCodex);
+      fadeGain(1);
+      lastKeypressTime = new Date().getTime(); // resets timer to auto
+      resetCodex();
       fadeInElement($screenCodex);
     } else if (to === STATE.DEBUG) {
       setCurrentState(STATE.DEBUG, $screenCodex);
@@ -513,6 +561,26 @@ function transition(from, to) {
       fadeGain(0);
     }
   }
+}
+
+function stopAllFades () {
+  for (const key in fadeTimeoutMap) {
+    if (Object.prototype.hasOwnProperty.call(fadeTimeoutMap, key)) {
+      cancelAnimationFrame(fadeTimeoutMap[key]);
+    }
+  }
+
+  const $fadeInElements = document.querySelectorAll('.fade-in');
+  $fadeInElements.forEach(function ($element) { 
+    $element.classList.remove('fade-in');
+    $element.style.opacity = 1; 
+  });
+
+  const $fadeOutElements = document.querySelectorAll('.fade-out');
+  $fadeOutElements.forEach(function ($element) { 
+    $element.classList.remove('fade-out');
+    $element.style.opacity = 0; 
+  });
 }
 
 function update() {
