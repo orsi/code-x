@@ -360,11 +360,8 @@ function onKeydown(ev) {
       showLetter(letter);
 
       // ensure instructions are hidden on first keypress
-      if ($codexInstructions.classList.contains('fade-out') === false &&
-        $codexInstructions.classList.contains('hidden') === false) {
-        fadeOutElement($codexInstructions, 1000, function () {
-          $codexInstructions.classList.add('hidden');
-        });
+      if (+$codexInstructions.style.opacity !== 0) {
+        fadeOutElement($codexInstructions);
       }
     } else if (keyCode >= 97 && keyCode <= 122) {
       // lower case letters
@@ -372,22 +369,23 @@ function onKeydown(ev) {
       showLetter(letter);
 
       // ensure instructions are hidden on first keypress
-      if ($codexInstructions.classList.contains('fade-out') === false &&
-        $codexInstructions.classList.contains('hidden') === false) {
-        fadeOutElement($codexInstructions, 1000, function () {
-          $codexInstructions.classList.add('hidden');
-        });
+      if (+$codexInstructions.style.opacity !== 0) {
+        fadeOutElement($codexInstructions);
       }
     } else if (keyCode === 32) {
       // space
-      resetCodex();
+
+      // fade out codex, reset
+      fadeGain(0, 1);
+      fadeOutElement($codex, 1000, function () {
+        fadeInElement($codex, 0);
+        fadeGain(1);
+        resetCodex();
+      });
 
       // ensure instructions are hidden on first keypress
-      if ($codexInstructions.classList.contains('fade-out') === false &&
-        $codexInstructions.classList.contains('hidden') === false) {
-        fadeOutElement($codexInstructions, 1000, function () {
-          $codexInstructions.classList.add('hidden');
-        });
+      if (+$codexInstructions.style.opacity !== 0) {
+        fadeOutElement($codexInstructions);
       }
     } else if (keyCode === 27) {
       // escape
@@ -533,18 +531,25 @@ function setCurrentState(state, $element) {
 function transition(from, to) {
   if (from === STATE.TITLE) {
     stopAllFades();
-    fadeOutElement($screenTitle);
 
     if (to === STATE.INTERACTIVE) {
-      setCurrentState(STATE.INTERACTIVE, $screenCodex);
+      if (+$codexInstructions.style.opacity === 0) {
+        fadeInElement($codexInstructions, 0);
+      }
+
       fadeGain(1);
-      lastKeypressTime = new Date().getTime(); // resets timer to auto
       resetCodex();
-      fadeInElement($screenCodex);
+      lastKeypressTime = new Date().getTime(); // resets timer to auto
+      fadeOutElement($screenTitle, 1000, function () {
+        fadeInElement($screenCodex);
+        setCurrentState(STATE.INTERACTIVE, $screenCodex);
+      });
     } else if (to === STATE.DEBUG) {
-      setCurrentState(STATE.DEBUG, $screenCodex);
-      fadeInElement($screenCodex);
       revealAll();
+      fadeOutElement($screenTitle, 1000, function () {
+        fadeInElement($screenCodex);
+        setCurrentState(STATE.DEBUG, $screenCodex);
+      });
     }
 
   } else if (from === STATE.DEBUG) {
@@ -558,26 +563,29 @@ function transition(from, to) {
   } else if (from === STATE.INTERACTIVE) {
 
     if (to === STATE.TITLE) {
-      setCurrentState(STATE.TITLE, $screenTitle);
-      fadeOutElement($screenCodex);
-      fadeInElement($screenTitle);
-      fadeGain(0);
+      fadeGain(0, 1);
+      fadeOutElement($screenCodex, 1000, function () {
+        fadeInElement($screenTitle);
+        setCurrentState(STATE.TITLE, $screenTitle);
+      });
     } else if (to === STATE.AUTO) {
-      setCurrentState(STATE.AUTO, $screenCodex);
       resetCodex();
-      if ($codexInstructions.classList.contains('hidden') === false) {
-        fadeOutElement($codexInstructions, 1000);
+      if (+$codexInstructions.style.opacity !== 0) {
+        fadeOutElement($codexInstructions);
       }
-      fadeInElement($screenTitle, 1000);
+      setCurrentState(STATE.AUTO, $screenCodex);
     }
 
   } else if (from === STATE.AUTO) {
+
     if (to === STATE.TITLE) {
-      setCurrentState(STATE.TITLE, $screenTitle);
-      fadeOutElement($screenCodex);
-      fadeInElement($screenTitle);
-      fadeGain(0);
+      fadeGain(0, 1);
+      fadeOutElement($screenCodex, 1000, function () {
+        fadeInElement($screenTitle);
+        setCurrentState(STATE.TITLE, $screenTitle);
+      });
     }
+
   }
 }
 
@@ -618,7 +626,7 @@ function update() {
           fadeInElement($enterButton, 1000);
           $enterButton.classList.remove('display-none');
         });
-      }, 1500);
+      }, 750);
       isInitialized = true;
     }
   }
