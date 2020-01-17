@@ -204,14 +204,21 @@ function generateCodexHtml(container) {
   }
 }
 
-function getNormalizedDistance(min, max) {
-  const clientX = lastMouseEvent.clientX;
+function getVerticalDistance(min, max) {
   const clientY = lastMouseEvent.clientY;
   const windowHeight = window.innerHeight;
-  const windowWidth = window.innerWidth;
   const midHeight = windowHeight / 2;
   const distanceFromMidHeight = midHeight - clientY;
   const normalizedDistance = (max - min) * ((distanceFromMidHeight - (-midHeight)) / (midHeight - (-midHeight))) + min;
+  return normalizedDistance;
+}
+
+function getHorizontalDistance(min, max) {
+  const clientX = lastMouseEvent.clientX;
+  const windowWidth = window.innerWidth;
+  const midWidth = windowWidth / 2;
+  const distanceFromMidWidth = clientX - midWidth;
+  const normalizedDistance = (max - min) * ((distanceFromMidWidth - (-midWidth)) / (midWidth - (-midWidth))) + min;
   return normalizedDistance;
 }
 
@@ -405,7 +412,7 @@ function onKeydown(ev) {
 function onMouseMove(ev) {
   lastMouseEvent = ev;
   if (currentState === STATE.AUTO) {
-    let distanceRatio = getNormalizedDistance(0.25, 2);
+    let distanceRatio = getVerticalDistance(0.25, 2);
     for (let i = 0; i < currentAudio.length; i++) {
       currentAudio[i].playbackRate.value = distanceRatio;
     }
@@ -416,12 +423,22 @@ function onMouseMove(ev) {
   }
 }
 
-function playAudio(source, playbackRate) {
+function playAudio(source, _playbackRate, _pan) {
+  const playbackRate = _playbackRate || 1;
+  const pan = _pan || 0;
   const cloneSource = AUDIO_CONTEXT.createBufferSource();
   cloneSource.buffer = source.buffer;
-  cloneSource.playbackRate.value = playbackRate || 1;
+  cloneSource.playbackRate.value = playbackRate;
   currentAudio.push(cloneSource);
-  cloneSource.connect(AUDIO_GAIN_NODE);
+
+  // pan control
+  const pannerNode = AUDIO_CONTEXT.createStereoPanner();
+  pannerNode.pan.setValueAtTime(pan, AUDIO_CONTEXT.currentTime);
+
+  // connect node to destination
+  cloneSource.connect(pannerNode);
+  pannerNode.connect(AUDIO_GAIN_NODE);
+
   cloneSource.onended = function () {
     if(this.stop) {
       this.stop(); 
@@ -436,12 +453,12 @@ function playAudio(source, playbackRate) {
   cloneSource.start(0);
 }
 
-function playLetterAudio(letter, playbackRate) {
+function playLetterAudio(letter, playbackRate, pan) {
   const audioBufferSource = AUDIO_LETTER_BUFFERS[letter];
   if (audioBufferSource === undefined) {
     return;
   }
-  playAudio(audioBufferSource, playbackRate);
+  playAudio(audioBufferSource, playbackRate, pan);
 }
 
 function resetCodex() {
@@ -496,8 +513,9 @@ function showLetter(letter) {
     if (currentState === STATE.INTERACTIVE) {
       playLetterAudio(letter);
     } else if (currentState === STATE.AUTO) {
-      const playbackRate = getNormalizedDistance(0.25, 2);
-      playLetterAudio(letter, playbackRate);
+      const playbackRate = getVerticalDistance(0.25, 2);
+      const pan = getHorizontalDistance(-1, 1);
+      playLetterAudio(letter, playbackRate, pan);
     }
   }
 }
