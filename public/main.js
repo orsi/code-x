@@ -1,6 +1,12 @@
 const AUDIO_CONTEXT = new (window.AudioContext || window.webkitAudioContext)();
-const AUDIO_GAIN_NODE = AUDIO_CONTEXT.createGain();
+const AUDIO_DISTORTION = AUDIO_CONTEXT.createWaveShaper();
+const AUDIO_DISTORTION_GAIN = AUDIO_CONTEXT.createGain();
+const AUDIO_DRY_CHANNEL = AUDIO_CONTEXT.createGain();
+const AUDIO_EFFECTS_CHANNEL = AUDIO_CONTEXT.createGain();
 const AUDIO_LETTER_BUFFERS = {};
+const AUDIO_MASTER_GAIN = AUDIO_CONTEXT.createGain();
+const AUDIO_REVERB = AUDIO_CONTEXT.createConvolver();
+const AUDIO_REVERSE_REVERB = AUDIO_CONTEXT.createConvolver();
 const FADEOUT_LETTERS_INTERVALS = {};
 const MAX_FADEOUT_LETTER_TIME = 8000;
 const MIN_FADEOUT_LETTER_TIME = 5000;
@@ -13,7 +19,7 @@ const STATE = {
   AUTO: 2,
   DEBUG: 3
 };
-const TIME_TIL_AUTO = 10000;
+const TIME_TIL_AUTO = 10;
 const TIME_TIL_FADEOUT_LETTER = 5000;
 let $codex;
 let $codexInstructions;
@@ -148,11 +154,11 @@ function fadeGain(value, seconds) {
   }
 
   // cancel any current schedules
-  AUDIO_GAIN_NODE.gain.cancelScheduledValues(AUDIO_CONTEXT.currentTime);
+  AUDIO_MASTER_GAIN.gain.cancelScheduledValues(AUDIO_CONTEXT.currentTime);
   // set checkpoint
-  AUDIO_GAIN_NODE.gain.setValueAtTime(AUDIO_GAIN_NODE.gain.value, AUDIO_CONTEXT.currentTime);
+  AUDIO_MASTER_GAIN.gain.setValueAtTime(AUDIO_MASTER_GAIN.gain.value, AUDIO_CONTEXT.currentTime);
   // now fade
-  AUDIO_GAIN_NODE.gain.linearRampToValueAtTime(value, AUDIO_CONTEXT.currentTime + seconds);
+  AUDIO_MASTER_GAIN.gain.linearRampToValueAtTime(value, AUDIO_CONTEXT.currentTime + seconds);
 }
 
 function getDelayFadeoutLetterTime() {
@@ -204,22 +210,35 @@ function generateCodexHtml(container) {
   }
 }
 
-function getVerticalDistance(min, max) {
-  const clientY = lastMouseEvent.clientY;
+function getDistanceFromCenter() {
+  const mouseY = lastMouseEvent.clientY;
+  const mouseX = lastMouseEvent.clientX;
   const windowHeight = window.innerHeight;
+  const windowWidth = window.innerWidth;
   const midHeight = windowHeight / 2;
-  const distanceFromMidHeight = midHeight - clientY;
-  const normalizedDistance = (max - min) * ((distanceFromMidHeight - (-midHeight)) / (midHeight - (-midHeight))) + min;
-  return normalizedDistance;
+  const midWidth = windowWidth / 2;
+  const maxDistance = Math.sqrt(Math.pow((windowWidth - midWidth), 2) + Math.pow((windowHeight - midHeight), 2));
+  const distanceFromCenter = Math.sqrt(Math.pow((midWidth - mouseX), 2) + Math.pow((midHeight - mouseY), 2));
+  const normalizedValue = distanceFromCenter / maxDistance;
+  return normalizedValue;
 }
 
-function getHorizontalDistance(min, max) {
-  const clientX = lastMouseEvent.clientX;
-  const windowWidth = window.innerWidth;
-  const midWidth = windowWidth / 2;
-  const distanceFromMidWidth = clientX - midWidth;
-  const normalizedDistance = (max - min) * ((distanceFromMidWidth - (-midWidth)) / (midWidth - (-midWidth))) + min;
-  return normalizedDistance;
+function getVerticalDistanceFromCenter() {
+  const mouseY = lastMouseEvent.clientY;
+  const windowHeight = window.innerHeight;
+  const maxVerticalDistance = windowHeight / 2;
+  const distanceFromCenter = maxVerticalDistance - mouseY;
+  const normalizedValue = distanceFromCenter / maxVerticalDistance;
+  return normalizedValue;
+}
+
+function getHorizontalDistanceFromCenter() {
+  const mouseX = lastMouseEvent.clientX;
+  const maxWidth = window.innerWidth;
+  const maxHorizontalDistance = maxWidth / 2;
+  const distanceFromCenter = mouseX - maxHorizontalDistance;
+  const normalizedValue = distanceFromCenter / maxHorizontalDistance;
+  return normalizedValue;
 }
 
 /**
@@ -241,6 +260,23 @@ function getUUID() { // Public Domain/MIT
   });
 }
 
+function impulseResponse(duration, decay, reverse) {
+  var sampleRate = AUDIO_CONTEXT.sampleRate;
+  var length = sampleRate * duration;
+  var impulse = AUDIO_CONTEXT.createBuffer(2, length, sampleRate);
+  var impulseL = impulse.getChannelData(0);
+  var impulseR = impulse.getChannelData(1);
+
+  if (!decay)
+      decay = 2.0;
+  for (var i = 0; i < length; i++){
+    var n = reverse ? length - i : i;
+    impulseL[i] = (Math.random() * 2 - 1) * Math.pow(1 - n / length, decay);
+    impulseR[i] = (Math.random() * 2 - 1) * Math.pow(1 - n / length, decay);
+  }
+  return impulse;
+}
+
 function initialize() {
   // select elements
   $codex = document.querySelector('#codex');
@@ -257,9 +293,27 @@ function initialize() {
   document.addEventListener('mousemove', onMouseMove);
   $enterButton.addEventListener('click', onClickEnterButton);
   $volumeButton.addEventListener('click', onClickVolumeButton);
-
-  // connect gain to audio context
-  AUDIO_GAIN_NODE.connect(AUDIO_CONTEXT.destination);
+  
+  // setup gains and effects 
+  AUDIO_EFFECTS_CHANNEL.gain.setValueAtTime(0, AUDIO_CONTEXT.currentTime);
+  AUDIO_DRY_CHANNEL.gain.setValueAtTime(1, AUDIO_CONTEXT.currentTime);
+  AUDIO_REVERB.buffer = impulseResponse(5, 20, false);
+  AUDIO_REVERSE_REVERB.buffer = impulseResponse(.8, 10, true);
+  AUDIO_DISTORTION.curve = makeDistortionCurve(500);
+  AUDIO_DISTORTION.oversample = '4x';
+  // compensate for increase rms volume
+  AUDIO_DISTORTION_GAIN.gain.setValueAtTime(0.04, AUDIO_CONTEXT.currentTime); 
+  
+  // routing
+  AUDIO_EFFECTS_CHANNEL.connect(AUDIO_REVERB);
+  AUDIO_EFFECTS_CHANNEL.connect(AUDIO_REVERSE_REVERB);
+  AUDIO_EFFECTS_CHANNEL.connect(AUDIO_DISTORTION);
+    AUDIO_DISTORTION.connect(AUDIO_DISTORTION_GAIN);
+    AUDIO_DISTORTION_GAIN.connect(AUDIO_MASTER_GAIN);
+    AUDIO_REVERB.connect(AUDIO_MASTER_GAIN);
+    AUDIO_REVERSE_REVERB.connect(AUDIO_MASTER_GAIN);
+  AUDIO_DRY_CHANNEL.connect(AUDIO_MASTER_GAIN);
+  AUDIO_MASTER_GAIN.connect(AUDIO_CONTEXT.destination);
 
   // try to setup mobile audio
   // taken from https://gist.github.com/laziel/7aefabe99ee57b16081c
@@ -315,6 +369,23 @@ function loadAudioFiles() {
     }
     request.send();
   }
+}
+
+function makeDistortionCurve(amount) {
+  var k = amount || 50;
+  const sampleLength = 44100;
+  const curve = new Float32Array(sampleLength);
+  const deg = Math.PI / 180;
+  for (let i = 0; i < sampleLength; ++i) {
+    const x = i * 2 / sampleLength - 1;
+    curve[i] = k * x * 20 * deg / ( Math.PI + k * Math.abs(x));
+  }
+  return curve;
+}
+
+function normalizeValue(value, valueMin, valueMax, min, max) {
+  const normalizedValue = (max - min) * ((value - valueMin) / (valueMax -valueMin)) + min;
+  return normalizedValue;
 }
 
 function onClickEnterButton(ev) {
@@ -409,33 +480,44 @@ function onKeydown(ev) {
 
 function onMouseMove(ev) {
   lastMouseEvent = ev;
+
   if (currentState === STATE.AUTO) {
-    let distanceRatio = getVerticalDistance(0.25, 2);
+    // convert -1-1 range to .25-2 for playbackRate
+    let normalizedVerticalDistance = normalizeValue(getVerticalDistanceFromCenter(), -1, 1, 0.25, 2);
     for (let i = 0; i < currentAudio.length; i++) {
-      currentAudio[i].playbackRate.value = distanceRatio;
+      currentAudio[i].playbackRate.value = normalizedVerticalDistance;
     }
+    
+    // cross fade between effects/dry channel
+    const wetGain = getDistanceFromCenter();
+    const dryGain = 1 - wetGain;
+    AUDIO_EFFECTS_CHANNEL.gain.linearRampToValueAtTime(wetGain, AUDIO_CONTEXT.currentTime);
+    AUDIO_DRY_CHANNEL.gain.linearRampToValueAtTime(dryGain, AUDIO_CONTEXT.currentTime);
 
     // modify letter updates according to distance from center ratio
-    maxNextAutoUpdateTime = MAX_NEXT_AUTO_UPDATE_TIME / distanceRatio;
-    minNextAutoUpdateTime = MIN_NEXT_AUTO_UPDATE_TIME / distanceRatio;
+    maxNextAutoUpdateTime = MAX_NEXT_AUTO_UPDATE_TIME / normalizedVerticalDistance;
+    minNextAutoUpdateTime = MIN_NEXT_AUTO_UPDATE_TIME / normalizedVerticalDistance;
   }
 }
 
 function playAudio(source, _playbackRate, _pan) {
-  const playbackRate = _playbackRate || 1;
-  const pan = _pan || 0;
   const cloneSource = AUDIO_CONTEXT.createBufferSource();
   cloneSource.buffer = source.buffer;
+  
+  // playback rate
+  const playbackRate = _playbackRate || 1;
   cloneSource.playbackRate.value = playbackRate;
   currentAudio.push(cloneSource);
-
+  
   // pan control
+  const pan = _pan || 0;
   const pannerNode = AUDIO_CONTEXT.createStereoPanner();
   pannerNode.pan.setValueAtTime(pan, AUDIO_CONTEXT.currentTime);
 
-  // connect node to destination
+  // sends
   cloneSource.connect(pannerNode);
-  pannerNode.connect(AUDIO_GAIN_NODE);
+  pannerNode.connect(AUDIO_DRY_CHANNEL);
+  cloneSource.connect(AUDIO_EFFECTS_CHANNEL);
 
   cloneSource.onended = function () {
     if(this.stop) {
@@ -456,6 +538,7 @@ function playLetterAudio(letter, playbackRate, pan) {
   if (audioBufferSource === undefined) {
     return;
   }
+
   playAudio(audioBufferSource, playbackRate, pan);
 }
 
@@ -511,9 +594,9 @@ function showLetter(letter) {
     if (currentState === STATE.INTERACTIVE) {
       playLetterAudio(letter);
     } else if (currentState === STATE.AUTO) {
-      const playbackRate = getVerticalDistance(0.25, 2);
-      const pan = getHorizontalDistance(-1, 1);
-      playLetterAudio(letter, playbackRate, pan);
+      const normalizedPlaybackRate = normalizeValue(getVerticalDistanceFromCenter(), -1, 1, 0.25, 2);
+      const pan = getHorizontalDistanceFromCenter();
+      playLetterAudio(letter, normalizedPlaybackRate, pan);
     }
   }
 }
