@@ -19,7 +19,7 @@ const STATE = {
   AUTO: 2,
   DEBUG: 3
 };
-const TIME_TIL_AUTO = 10;
+const TIME_TIL_AUTO = 10000;
 const TIME_TIL_FADEOUT_LETTER = 5000;
 let $codex;
 let $codexInstructions;
