@@ -35,7 +35,7 @@ let fadeTimeoutMap = {};
 let isInitialized = false;
 let isAudioLoaded = false;
 let isAudioMuted = false;
-let isMobile = true; // /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 let isMobileAudioEnabled = false;
 let lastKeypressTime = new Date().getTime();
 let lastUpdateTime = new Date().getTime();
@@ -315,22 +315,6 @@ function initialize() {
   AUDIO_DRY_CHANNEL.connect(AUDIO_MASTER_GAIN);
   AUDIO_MASTER_GAIN.connect(AUDIO_CONTEXT.destination);
 
-  // try to setup mobile audio
-  // taken from https://gist.github.com/laziel/7aefabe99ee57b16081c
-  // ** USER MUST NOT BE IN SILENT MODE ON PHONES (i.e. ringer silent) **
-  if (AUDIO_CONTEXT.state === 'suspended') {
-    var resume = function () {
-      AUDIO_CONTEXT.resume();
-      setTimeout(function () {
-        if (AUDIO_CONTEXT.state === 'running') {
-          document.body.removeEventListener('touchend', resume, false);
-          isMobileAudioEnabled = true;
-        }
-      }, 0);
-    };
-    document.body.addEventListener('touchend', resume, false);
-  }
-
   // load audio
   loadAudioFiles();
 
@@ -388,8 +372,21 @@ function normalizeValue(value, valueMin, valueMax, min, max) {
   return normalizedValue;
 }
 
+function enableMobileAudio() {
+  // play the first letter without attaching
+  // to audio context to enable audio
+  const audioBufferSource = AUDIO_LETTER_BUFFERS['a'];
+  const cloneSource = AUDIO_CONTEXT.createBufferSource();
+  cloneSource.buffer = audioBufferSource.buffer;
+  cloneSource.connect(AUDIO_CONTEXT.destination);
+  cloneSource.start();
+  cloneSource.disconnect();
+  isMobileAudioEnabled = true;
+}
+
 function onClickEnterButton(ev) {
   if (isMobile) {
+    enableMobileAudio();
     transition(STATE.TITLE, STATE.AUTO);
   } else {
     transition(STATE.TITLE, STATE.INTERACTIVE);
@@ -654,16 +651,18 @@ function transition(from, to) {
   } else if (from === STATE.INTERACTIVE) {
 
     if (to === STATE.TITLE) {
-      fadeGain(0, 1);
+      fadeGain(0);
       fadeOutElement($screenCodex, 1000, function () {
         fadeInElement($screenTitle);
         setCurrentState(STATE.TITLE, $screenTitle);
       });
     } else if (to === STATE.AUTO) {
+      fadeGain(0);
       resetCodex();
       if (+$codexInstructions.style.opacity !== 0) {
         fadeOutElement($codexInstructions);
       }
+      fadeGain(1);
       setCurrentState(STATE.AUTO, $screenCodex);
     }
 
