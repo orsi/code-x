@@ -289,10 +289,15 @@ function initialize() {
   $volumeButton = document.querySelector('#codex-volume-button');
 
   // setup events
-  document.addEventListener('keydown', onKeydown);
-  document.addEventListener('mousemove', onMouseMove);
-  $enterButton.addEventListener('click', onClickEnterButton);
-  $volumeButton.addEventListener('click', onClickVolumeButton);
+  if (isMobile) {
+    $enterButton.addEventListener('touchstart', onClickEnterButton);
+    $volumeButton.addEventListener('touchstart', onClickVolumeButton);
+  } else {
+    document.addEventListener('keydown', onKeydown);
+    document.addEventListener('mousemove', onMouseMove);
+    $enterButton.addEventListener('click', onClickEnterButton);
+    $volumeButton.addEventListener('click', onClickVolumeButton);
+  }
   
   // setup gains and effects 
   AUDIO_EFFECTS_CHANNEL.gain.setValueAtTime(0, AUDIO_CONTEXT.currentTime);
@@ -373,14 +378,8 @@ function normalizeValue(value, valueMin, valueMax, min, max) {
 }
 
 function enableMobileAudio() {
-  // play the first letter without attaching
-  // to audio context to enable audio
-  const audioBufferSource = AUDIO_LETTER_BUFFERS['a'];
-  const cloneSource = AUDIO_CONTEXT.createBufferSource();
-  cloneSource.buffer = audioBufferSource.buffer;
-  cloneSource.connect(AUDIO_CONTEXT.destination);
-  cloneSource.start();
-  cloneSource.disconnect();
+  // create gain to enable audio
+  AUDIO_CONTEXT.createGain();
 
   if (AUDIO_CONTEXT.state === 'suspended') {
     AUDIO_CONTEXT.resume();
