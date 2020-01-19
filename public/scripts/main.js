@@ -289,12 +289,12 @@ function initialize() {
   $volumeButton = document.querySelector('#codex-volume-button');
 
   // setup events
+  document.addEventListener('keydown', onKeydown);
+  document.addEventListener('mousemove', onMouseMove);
   if (isMobile) {
     $enterButton.addEventListener('touchstart', onClickEnterButton);
     $volumeButton.addEventListener('touchstart', onClickVolumeButton);
   } else {
-    document.addEventListener('keydown', onKeydown);
-    document.addEventListener('mousemove', onMouseMove);
     $enterButton.addEventListener('click', onClickEnterButton);
     $volumeButton.addEventListener('click', onClickVolumeButton);
   }
