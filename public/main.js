@@ -35,7 +35,7 @@ let fadeTimeoutMap = {};
 let isInitialized = false;
 let isAudioLoaded = false;
 let isAudioMuted = false;
-let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+let isMobile = true; // /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 let isMobileAudioEnabled = false;
 let lastKeypressTime = new Date().getTime();
 let lastUpdateTime = new Date().getTime();
@@ -390,7 +390,6 @@ function normalizeValue(value, valueMin, valueMax, min, max) {
 
 function onClickEnterButton(ev) {
   if (isMobile) {
-    onClickVolumeButton();
     transition(STATE.TITLE, STATE.AUTO);
   } else {
     transition(STATE.TITLE, STATE.INTERACTIVE);
@@ -633,6 +632,14 @@ function transition(from, to) {
         fadeInElement($screenCodex);
         setCurrentState(STATE.DEBUG, $screenCodex);
       });
+    } else if (to === STATE.AUTO) {
+      fadeGain(1);
+      resetCodex();
+      fadeOutElement($codexInstructions, 0);
+      fadeOutElement($screenTitle, 1000, function () {
+        fadeInElement($screenCodex);
+        setCurrentState(STATE.AUTO, $screenCodex);
+      });
     }
 
   } else if (from === STATE.DEBUG) {
@@ -662,7 +669,7 @@ function transition(from, to) {
   } else if (from === STATE.AUTO) {
 
     if (to === STATE.TITLE) {
-      fadeGain(0, 1);
+      fadeGain(0);
       fadeOutElement($screenCodex, 1000, function () {
         fadeInElement($screenTitle);
         setCurrentState(STATE.TITLE, $screenTitle);
