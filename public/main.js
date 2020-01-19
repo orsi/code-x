@@ -381,6 +381,12 @@ function enableMobileAudio() {
   cloneSource.connect(AUDIO_CONTEXT.destination);
   cloneSource.start();
   cloneSource.disconnect();
+
+  if (AUDIO_CONTEXT.state === 'suspended') {
+    AUDIO_CONTEXT.resume();
+    AUDIO_CONTEXT.onstatechange = function () { console.log(AUDIO_CONTEXT.state); }; 
+  }
+
   isMobileAudioEnabled = true;
 }
 
