@@ -211,12 +211,12 @@ function generateCodexHtml(container) {
 }
 
 function getDistanceFromCenter() {
-  const mouseY = lastMouseEvent.clientY;
-  const mouseX = lastMouseEvent.clientX;
   const windowHeight = window.innerHeight;
   const windowWidth = window.innerWidth;
   const midHeight = windowHeight / 2;
   const midWidth = windowWidth / 2;
+  const mouseY = lastMouseEvent ? lastMouseEvent.clientY : midHeight;
+  const mouseX = lastMouseEvent ? lastMouseEvent.clientX : midWidth;
   const maxDistance = Math.sqrt(Math.pow((windowWidth - midWidth), 2) + Math.pow((windowHeight - midHeight), 2));
   const distanceFromCenter = Math.sqrt(Math.pow((midWidth - mouseX), 2) + Math.pow((midHeight - mouseY), 2));
   const normalizedValue = distanceFromCenter / maxDistance;
@@ -224,18 +224,18 @@ function getDistanceFromCenter() {
 }
 
 function getVerticalDistanceFromCenter() {
-  const mouseY = lastMouseEvent.clientY;
   const windowHeight = window.innerHeight;
   const maxVerticalDistance = windowHeight / 2;
+  const mouseY = lastMouseEvent ? lastMouseEvent.clientY : maxVerticalDistance;
   const distanceFromCenter = maxVerticalDistance - mouseY;
   const normalizedValue = distanceFromCenter / maxVerticalDistance;
   return normalizedValue;
 }
 
 function getHorizontalDistanceFromCenter() {
-  const mouseX = lastMouseEvent.clientX;
   const maxWidth = window.innerWidth;
   const maxHorizontalDistance = maxWidth / 2;
+  const mouseX = lastMouseEvent ? lastMouseEvent.clientX : maxHorizontalDistance;
   const distanceFromCenter = mouseX - maxHorizontalDistance;
   const normalizedValue = distanceFromCenter / maxHorizontalDistance;
   return normalizedValue;
