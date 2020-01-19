@@ -645,9 +645,10 @@ function transition(from, to) {
   } else if (from === STATE.DEBUG) {
 
     if (to === STATE.TITLE) {
-      fadeOutElement($screenCodex);
-      setCurrentState(STATE.TITLE, $screenCodex);
-      fadeInElement($screenTitle);
+      fadeOutElement($screenCodex, 1000, function () {
+        fadeInElement($screenTitle);
+        setCurrentState(STATE.TITLE, $screenCodex);
+      });
     } 
 
   } else if (from === STATE.INTERACTIVE) {
