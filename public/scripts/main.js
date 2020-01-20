@@ -532,10 +532,8 @@ function playAudio(source, _playbackRate, _pan) {
   cloneSource.buffer = source.buffer;
   
   // playback rate
-  if (!isMobile) {
-    const playbackRate = _playbackRate || 1;
-    cloneSource.playbackRate.value = playbackRate;
-  }
+  const playbackRate = _playbackRate || 1;
+  cloneSource.playbackRate.value = playbackRate;
   currentAudio.push(cloneSource);
   
   // pan control
