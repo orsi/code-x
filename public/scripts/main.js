@@ -468,16 +468,6 @@ function onKeydown(ev) {
 
   } else if (currentState === STATE.AUTO) {
     transition(STATE.AUTO, STATE.TITLE);
-  } else if (currentState === STATE.TITLE) {
-    if (keyCode === 'D'.charCodeAt(0)) {
-      // upper case letters
-      transition(STATE.TITLE, STATE.DEBUG);
-    }
-  } else if (currentState === STATE.DEBUG) {
-    if (keyCode === 27) {
-      // escape
-      transition(STATE.DEBUG, STATE.TITLE);
-    }
   }
 }
 
