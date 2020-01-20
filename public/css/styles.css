@@ -88,7 +88,7 @@ button {
     height: 2px;
     margin: 8px auto;
     padding: 0;
-    transition: width .1s linear;
+    transition: width 1s linear;
     width: 0px;
 }
 #enter-container {

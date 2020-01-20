@@ -643,6 +643,7 @@ function setCurrentState(state, $element) {
 function transition(from, to) {
   if (from === STATE.TITLE) {
     stopAllFades();
+    $redBar.style.width = '0px';
 
     if (to === STATE.INTERACTIVE) {
       if (+$codexInstructions.style.opacity === 0) {
@@ -676,6 +677,7 @@ function transition(from, to) {
 
     if (to === STATE.TITLE) {
       fadeOutElement($screenCodex, 1000, function () {
+        $redBar.style.width =  '100%';
         fadeInElement($screenTitle);
         setCurrentState(STATE.TITLE, $screenCodex);
       });
@@ -686,6 +688,7 @@ function transition(from, to) {
     if (to === STATE.TITLE) {
       fadeGain(0);
       fadeOutElement($screenCodex, 1000, function () {
+        $redBar.style.width =  '100%';
         fadeInElement($screenTitle);
         setCurrentState(STATE.TITLE, $screenTitle);
       });
@@ -704,6 +707,7 @@ function transition(from, to) {
     if (to === STATE.TITLE) {
       fadeGain(0);
       fadeOutElement($screenCodex, 1000, function () {
+        $redBar.style.width =  '100%';
         fadeInElement($screenTitle);
         setCurrentState(STATE.TITLE, $screenTitle);
       });
@@ -742,6 +746,7 @@ function update() {
       const width = lettersLoaded / totalLetters * window.outerWidth;
       $redBar.style.width =  width + 'px';
     } else if (isAudioLoaded && !isInitialized) {
+      $redBar.style.width =  '100%';
       // delay and hide mark sutherland, progress bar and show enter
       setTimeout(function () {
         fadeOutElement($markSutherland, 1000, function () {
