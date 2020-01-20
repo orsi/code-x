@@ -37,6 +37,8 @@ let isAudioLoaded = false;
 let isAudioMuted = false;
 let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 let isMobileAudioEnabled = false;
+let lastClientX;
+let lastClientY;
 let lastKeypressTime = new Date().getTime();
 let lastUpdateTime = new Date().getTime();
 let lastUpdateAutoTime = new Date().getTime();
@@ -215,8 +217,8 @@ function getDistanceFromCenter() {
   const windowWidth = window.innerWidth;
   const midHeight = windowHeight / 2;
   const midWidth = windowWidth / 2;
-  const mouseY = lastMouseEvent ? lastMouseEvent.clientY : midHeight;
-  const mouseX = lastMouseEvent ? lastMouseEvent.clientX : midWidth;
+  const mouseY = lastClientY ? lastClientY : midHeight;
+  const mouseX = lastClientX ? lastClientX : midWidth;
   const maxDistance = Math.sqrt(Math.pow((windowWidth - midWidth), 2) + Math.pow((windowHeight - midHeight), 2));
   const distanceFromCenter = Math.sqrt(Math.pow((midWidth - mouseX), 2) + Math.pow((midHeight - mouseY), 2));
   const normalizedValue = distanceFromCenter / maxDistance;
@@ -226,7 +228,7 @@ function getDistanceFromCenter() {
 function getVerticalDistanceFromCenter() {
   const windowHeight = window.innerHeight;
   const maxVerticalDistance = windowHeight / 2;
-  const mouseY = lastMouseEvent ? lastMouseEvent.clientY : maxVerticalDistance;
+  const mouseY = lastClientY ? lastClientY : maxVerticalDistance;
   const distanceFromCenter = maxVerticalDistance - mouseY;
   const normalizedValue = distanceFromCenter / maxVerticalDistance;
   return normalizedValue;
@@ -235,7 +237,7 @@ function getVerticalDistanceFromCenter() {
 function getHorizontalDistanceFromCenter() {
   const maxWidth = window.innerWidth;
   const maxHorizontalDistance = maxWidth / 2;
-  const mouseX = lastMouseEvent ? lastMouseEvent.clientX : maxHorizontalDistance;
+  const mouseX = lastClientX ? lastClientX : maxHorizontalDistance;
   const distanceFromCenter = mouseX - maxHorizontalDistance;
   const normalizedValue = distanceFromCenter / maxHorizontalDistance;
   return normalizedValue;
@@ -292,6 +294,7 @@ function initialize() {
   document.addEventListener('keydown', onKeydown);
   document.addEventListener('mousemove', onMouseMove);
   if (isMobile) {
+    document.addEventListener('touchstart', onTouchDocument);
     $enterButton.addEventListener('touchstart', onClickEnterButton);
     $volumeButton.addEventListener('touchstart', onClickVolumeButton);
   } else {
@@ -383,7 +386,6 @@ function enableMobileAudio() {
 
   if (AUDIO_CONTEXT.state === 'suspended') {
     AUDIO_CONTEXT.resume();
-    AUDIO_CONTEXT.onstatechange = function () { console.log(AUDIO_CONTEXT.state); }; 
   }
 
   isMobileAudioEnabled = true;
@@ -479,8 +481,32 @@ function onKeydown(ev) {
   }
 }
 
-function onMouseMove(ev) {
-  lastMouseEvent = ev;
+function onMouseMove(e) {
+  lastClientX = e.clientX;
+  lastClientY = e.clientY;
+
+  if (currentState === STATE.AUTO) {
+    // convert -1-1 range to .25-2 for playbackRate
+    let normalizedVerticalDistance = normalizeValue(getVerticalDistanceFromCenter(), -1, 1, 0.25, 2);
+    for (let i = 0; i < currentAudio.length; i++) {
+      currentAudio[i].playbackRate.value = normalizedVerticalDistance;
+    }
+    
+    // cross fade between effects/dry channel
+    const wetGain = getDistanceFromCenter();
+    const dryGain = 1 - wetGain;
+    AUDIO_EFFECTS_CHANNEL.gain.linearRampToValueAtTime(wetGain, AUDIO_CONTEXT.currentTime);
+    AUDIO_DRY_CHANNEL.gain.linearRampToValueAtTime(dryGain, AUDIO_CONTEXT.currentTime);
+
+    // modify letter updates according to distance from center ratio
+    maxNextAutoUpdateTime = MAX_NEXT_AUTO_UPDATE_TIME / normalizedVerticalDistance;
+    minNextAutoUpdateTime = MIN_NEXT_AUTO_UPDATE_TIME / normalizedVerticalDistance;
+  }
+}
+
+function onTouchDocument(e) {
+  lastClientX = e.touches[0].clientX;
+  lastClientY = e.touches[0].clientY;
 
   if (currentState === STATE.AUTO) {
     // convert -1-1 range to .25-2 for playbackRate
@@ -506,14 +532,18 @@ function playAudio(source, _playbackRate, _pan) {
   cloneSource.buffer = source.buffer;
   
   // playback rate
-  const playbackRate = _playbackRate || 1;
-  cloneSource.playbackRate.value = playbackRate;
+  if (!isMobile) {
+    const playbackRate = _playbackRate || 1;
+    cloneSource.playbackRate.value = playbackRate;
+  }
   currentAudio.push(cloneSource);
   
   // pan control
   const pan = _pan || 0;
-  const pannerNode = AUDIO_CONTEXT.createStereoPanner();
-  pannerNode.pan.setValueAtTime(pan, AUDIO_CONTEXT.currentTime);
+  const pannerNode = AUDIO_CONTEXT.createPanner();
+  pannerNode.panningModel = 'equalpower';
+  const z = 1 - Math.abs(pan);
+  pannerNode.setPosition(pan, 0, z);
 
   // sends
   cloneSource.connect(pannerNode);
