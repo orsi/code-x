@@ -1,12 +1,5 @@
 const AUDIO_CONTEXT = new (window.AudioContext || window.webkitAudioContext)();
-const AUDIO_DISTORTION = AUDIO_CONTEXT.createWaveShaper();
-const AUDIO_DISTORTION_GAIN = AUDIO_CONTEXT.createGain();
-const AUDIO_DRY_CHANNEL = AUDIO_CONTEXT.createGain();
-const AUDIO_EFFECTS_CHANNEL = AUDIO_CONTEXT.createGain();
 const AUDIO_LETTER_BUFFERS = {};
-const AUDIO_MASTER_GAIN = AUDIO_CONTEXT.createGain();
-const AUDIO_REVERB = AUDIO_CONTEXT.createConvolver();
-const AUDIO_REVERSE_REVERB = AUDIO_CONTEXT.createConvolver();
 const FADEOUT_LETTERS_INTERVALS = {};
 const MAX_FADEOUT_LETTER_TIME = 8000;
 const MIN_FADEOUT_LETTER_TIME = 5000;
@@ -29,7 +22,15 @@ let $redBar;
 let $screenTitle;
 let $screenCodex;
 let $volumeButton;
-let currentAudio = [];
+let audioCompressorNode;
+let audioDistortionNode;
+let audioDistortionGain;
+let audioDryChannelGain;
+let audioEffectsChannelGain;
+let audioMasterGain;
+let audioReverbNode;
+let audioReverseReverbNode;
+let currentAudio = {};
 let currentState;
 let fadeTimeoutMap = {};
 let isInitialized = false;
@@ -50,20 +51,15 @@ let totalLetters = 26;
 let nextUpdateAutoTime = 0;
 let previousState;
 
-function hideLetter(letter) {
-  // reset letter in codex object
-  for (let i = 0; i < codex.length; i++) {
-    // line
-    const codexLine = codex[i];
-    for (let j = 0; j < codexLine.length; j++) {
-      // letter
-      const codexLetter = codexLine[j];
-      if (codexLetter.letter === letter) {
-        fadeOutElement(codexLetter.element, 3000);
-        codexLetter.visible = false;
-      }
-    }
+function enableMobileAudio() {
+  // create gain to enable audio
+  AUDIO_CONTEXT.createGain();
+
+  if (AUDIO_CONTEXT.state === 'suspended') {
+    AUDIO_CONTEXT.resume();
   }
+
+  isMobileAudioEnabled = true;
 }
 
 function fadeInElement($element, time, callback) {
@@ -150,17 +146,8 @@ function fadeOutElement($element, time, callback) {
   tick();
 }
 
-function fadeGain(value, seconds) {
-  if (seconds === undefined) {
-    seconds = .1;
-  }
-
-  // cancel any current schedules
-  AUDIO_MASTER_GAIN.gain.cancelScheduledValues(AUDIO_CONTEXT.currentTime);
-  // set checkpoint
-  AUDIO_MASTER_GAIN.gain.setValueAtTime(AUDIO_MASTER_GAIN.gain.value, AUDIO_CONTEXT.currentTime);
-  // now fade
-  AUDIO_MASTER_GAIN.gain.linearRampToValueAtTime(value, AUDIO_CONTEXT.currentTime + seconds);
+function fadeVolume(value) {
+  audioMasterGain.gain.setTargetAtTime(value, AUDIO_CONTEXT.currentTime, 0.01);
 }
 
 function getDelayFadeoutLetterTime() {
@@ -262,6 +249,22 @@ function getUUID() { // Public Domain/MIT
   });
 }
 
+function hideLetter(letter) {
+  // reset letter in codex object
+  for (let i = 0; i < codex.length; i++) {
+    // line
+    const codexLine = codex[i];
+    for (let j = 0; j < codexLine.length; j++) {
+      // letter
+      const codexLetter = codexLine[j];
+      if (codexLetter.letter === letter) {
+        fadeOutElement(codexLetter.element, 3000);
+        codexLetter.visible = false;
+      }
+    }
+  }
+}
+
 function impulseResponse(duration, decay, reverse) {
   var sampleRate = AUDIO_CONTEXT.sampleRate;
   var length = sampleRate * duration;
@@ -302,26 +305,8 @@ function initialize() {
     $volumeButton.addEventListener('click', onClickVolumeButton);
   }
   
-  // setup gains and effects 
-  AUDIO_EFFECTS_CHANNEL.gain.setValueAtTime(0, AUDIO_CONTEXT.currentTime);
-  AUDIO_DRY_CHANNEL.gain.setValueAtTime(1, AUDIO_CONTEXT.currentTime);
-  AUDIO_REVERB.buffer = impulseResponse(5, 20, false);
-  AUDIO_REVERSE_REVERB.buffer = impulseResponse(.8, 10, true);
-  AUDIO_DISTORTION.curve = makeDistortionCurve(500);
-  AUDIO_DISTORTION.oversample = '4x';
-  // compensate for increase rms volume
-  AUDIO_DISTORTION_GAIN.gain.setValueAtTime(0.04, AUDIO_CONTEXT.currentTime); 
-  
-  // routing
-  AUDIO_EFFECTS_CHANNEL.connect(AUDIO_REVERB);
-  AUDIO_EFFECTS_CHANNEL.connect(AUDIO_REVERSE_REVERB);
-  AUDIO_EFFECTS_CHANNEL.connect(AUDIO_DISTORTION);
-    AUDIO_DISTORTION.connect(AUDIO_DISTORTION_GAIN);
-    AUDIO_DISTORTION_GAIN.connect(AUDIO_MASTER_GAIN);
-    AUDIO_REVERB.connect(AUDIO_MASTER_GAIN);
-    AUDIO_REVERSE_REVERB.connect(AUDIO_MASTER_GAIN);
-  AUDIO_DRY_CHANNEL.connect(AUDIO_MASTER_GAIN);
-  AUDIO_MASTER_GAIN.connect(AUDIO_CONTEXT.destination);
+  // audio setup
+  setupAudio()
 
   // load audio
   loadAudioFiles();
@@ -370,7 +355,7 @@ function makeDistortionCurve(amount) {
   const deg = Math.PI / 180;
   for (let i = 0; i < sampleLength; ++i) {
     const x = i * 2 / sampleLength - 1;
-    curve[i] = k * x * 20 * deg / ( Math.PI + k * Math.abs(x));
+    curve[i] = (3 + k) * x * 20 * deg / ( Math.PI + k * Math.abs(x));
   }
   return curve;
 }
@@ -380,20 +365,12 @@ function normalizeValue(value, valueMin, valueMax, min, max) {
   return normalizedValue;
 }
 
-function enableMobileAudio() {
-  // create gain to enable audio
-  AUDIO_CONTEXT.createGain();
-
-  if (AUDIO_CONTEXT.state === 'suspended') {
-    AUDIO_CONTEXT.resume();
+function onClickEnterButton(ev) {
+  if (!isMobileAudioEnabled) {
+    enableMobileAudio();
   }
 
-  isMobileAudioEnabled = true;
-}
-
-function onClickEnterButton(ev) {
   if (isMobile) {
-    enableMobileAudio();
     transition(STATE.TITLE, STATE.AUTO);
   } else {
     transition(STATE.TITLE, STATE.INTERACTIVE);
@@ -402,14 +379,14 @@ function onClickEnterButton(ev) {
 
 function onClickVolumeButton(ev) {
   if (isAudioMuted) {
-    fadeGain(1, .5);
+    fadeVolume(1);
     isAudioMuted = false;
     // change font-awesome icon
     const $icon = $volumeButton.querySelector('i');
     $icon.classList.remove('fa-volume-mute');
     $icon.classList.add('fa-volume-up');
   } else {
-    fadeGain(0, .5);
+    fadeVolume(0);
     isAudioMuted = true;
     // change font-awesome icon
     const $icon = $volumeButton.querySelector('i');
@@ -448,12 +425,8 @@ function onKeydown(ev) {
       }
     } else if (keyCode === 32) {
       // space
-
-      // fade out codex, reset
-      fadeGain(0, 1);
       fadeOutElement($codex, 1000, function () {
         fadeInElement($codex, 0);
-        fadeGain(1);
         resetCodex();
       });
 
@@ -476,21 +449,7 @@ function onMouseMove(e) {
   lastClientY = e.clientY;
 
   if (currentState === STATE.AUTO) {
-    // convert -1-1 range to .25-2 for playbackRate
-    let normalizedVerticalDistance = normalizeValue(getVerticalDistanceFromCenter(), -1, 1, 0.25, 2);
-    for (let i = 0; i < currentAudio.length; i++) {
-      currentAudio[i].playbackRate.value = normalizedVerticalDistance;
-    }
-    
-    // cross fade between effects/dry channel
-    const wetGain = getDistanceFromCenter();
-    const dryGain = 1 - wetGain;
-    AUDIO_EFFECTS_CHANNEL.gain.linearRampToValueAtTime(wetGain, AUDIO_CONTEXT.currentTime);
-    AUDIO_DRY_CHANNEL.gain.linearRampToValueAtTime(dryGain, AUDIO_CONTEXT.currentTime);
-
-    // modify letter updates according to distance from center ratio
-    maxNextAutoUpdateTime = MAX_NEXT_AUTO_UPDATE_TIME / normalizedVerticalDistance;
-    minNextAutoUpdateTime = MIN_NEXT_AUTO_UPDATE_TIME / normalizedVerticalDistance;
+    updateCurrentAudioEffects();
   }
 }
 
@@ -499,57 +458,71 @@ function onTouchDocument(e) {
   lastClientY = e.touches[0].clientY;
 
   if (currentState === STATE.AUTO) {
-    // convert -1-1 range to .25-2 for playbackRate
-    let normalizedVerticalDistance = normalizeValue(getVerticalDistanceFromCenter(), -1, 1, 0.25, 2);
-    for (let i = 0; i < currentAudio.length; i++) {
-      currentAudio[i].playbackRate.value = normalizedVerticalDistance;
-    }
-    
-    // cross fade between effects/dry channel
-    const wetGain = getDistanceFromCenter();
-    const dryGain = 1 - wetGain;
-    AUDIO_EFFECTS_CHANNEL.gain.linearRampToValueAtTime(wetGain, AUDIO_CONTEXT.currentTime);
-    AUDIO_DRY_CHANNEL.gain.linearRampToValueAtTime(dryGain, AUDIO_CONTEXT.currentTime);
-
-    // modify letter updates according to distance from center ratio
-    maxNextAutoUpdateTime = MAX_NEXT_AUTO_UPDATE_TIME / normalizedVerticalDistance;
-    minNextAutoUpdateTime = MIN_NEXT_AUTO_UPDATE_TIME / normalizedVerticalDistance;
+    updateCurrentAudioEffects();
   }
 }
 
+function updateCurrentAudioEffects() {
+  // convert -1-1 range to .25-2 for playbackRate
+  let normalizedVerticalDistance = normalizeValue(getVerticalDistanceFromCenter(), -1, 1, 0.25, 2);
+  for (let key in currentAudio) {
+    if (Object.prototype.hasOwnProperty.call(currentAudio, key)) {
+      const audioSource = currentAudio[key];
+      audioSource.playbackRate.exponentialRampToValueAtTime(normalizedVerticalDistance, AUDIO_CONTEXT.currentTime + 0.250);
+    }
+  }
+  
+  // cross fade between effects/dry channel
+  const wetGain = getDistanceFromCenter();
+  const dryGain = 1 - wetGain;
+  
+  // ramp to
+  audioEffectsChannelGain.gain.setTargetAtTime(wetGain, AUDIO_CONTEXT.currentTime, 0.1);
+  audioDryChannelGain.gain.setTargetAtTime(dryGain, AUDIO_CONTEXT.currentTime, 0.1);
+
+  // modify letter updates according to distance from center ratio
+  maxNextAutoUpdateTime = MAX_NEXT_AUTO_UPDATE_TIME / normalizedVerticalDistance;
+  minNextAutoUpdateTime = MIN_NEXT_AUTO_UPDATE_TIME / normalizedVerticalDistance;
+}
+
 function playAudio(source, _playbackRate, _pan) {
-  const cloneSource = AUDIO_CONTEXT.createBufferSource();
-  cloneSource.buffer = source.buffer;
+  const playbackRate = parseFloat(_playbackRate.toFixed(2));
+  const pan = parseFloat(_pan.toFixed(2));
+  const audioSource = AUDIO_CONTEXT.createBufferSource();
+  audioSource.buffer = source.buffer;
   
   // playback rate
-  const playbackRate = _playbackRate || 1;
-  cloneSource.playbackRate.value = playbackRate;
-  currentAudio.push(cloneSource);
+  if (playbackRate !== 1) {
+    audioSource.playbackRate.setTargetAtTime(playbackRate, AUDIO_CONTEXT.currentTime, 0.2);
+  }
+
+  const uuid = getUUID();
+  currentAudio[uuid] = audioSource;
   
+  // gain
+  const gainNode = AUDIO_CONTEXT.createGain();
+
   // pan control
-  const pan = _pan || 0;
-  const pannerNode = AUDIO_CONTEXT.createPanner();
-  pannerNode.panningModel = 'equalpower';
+  const panNode = AUDIO_CONTEXT.createPanner();
+  panNode.panningModel = 'equalpower';
   const z = 1 - Math.abs(pan);
-  pannerNode.setPosition(pan, 0, z);
+  panNode.setPosition(pan, 0, z);
 
   // sends
-  cloneSource.connect(pannerNode);
-  pannerNode.connect(AUDIO_DRY_CHANNEL);
-  cloneSource.connect(AUDIO_EFFECTS_CHANNEL);
+  audioSource.connect(gainNode);
+  gainNode.connect(panNode);
+  panNode.connect(audioDryChannelGain);
+  gainNode.connect(audioEffectsChannelGain);
 
-  cloneSource.onended = function () {
-    if(this.stop) {
-      this.stop(); 
-    }
-    if(this.disconnect) {
-      this.disconnect();
-    }
-    currentAudio = currentAudio.filter(function (currentAudio) {
-      return currentAudio !== cloneSource;
-    });
+  audioSource.onended = function () {
+    // remove from current audio
+    delete currentAudio[uuid];
   }
-  cloneSource.start(0);
+  
+  // play
+  gainNode.gain.linearRampToValueAtTime(0, AUDIO_CONTEXT.currentTime);
+  gainNode.gain.linearRampToValueAtTime(1, AUDIO_CONTEXT.currentTime + 0.1);
+  audioSource.start(0);
 }
 
 function playLetterAudio(letter, playbackRate, pan) {
@@ -561,13 +534,25 @@ function playLetterAudio(letter, playbackRate, pan) {
   playAudio(audioBufferSource, playbackRate, pan);
 }
 
+function resetAudio() {
+  audioMasterGain.gain.cancelScheduledValues(AUDIO_CONTEXT.currentTime);
+  audioMasterGain.gain.setValueAtTime(audioMasterGain.gain.value, AUDIO_CONTEXT.currentTime);
+  audioMasterGain.gain.linearRampToValueAtTime(0, AUDIO_CONTEXT.currentTime + 1);
+  setupAudio();
+}
+
 function resetCodex() {
-  // disconnect all playing audio
-  for (let i = 0; i < currentAudio.length; i++) {
-    const audioSource = currentAudio[i];
-    audioSource.disconnect();
-  }
-  currentAudio = [];
+  // stop and disconnect all playing audio
+  resetAudio();
+
+  // for (var key in currentAudio) {
+  //   if (Object.prototype.hasOwnProperty.call(currentAudio, key)) {
+  //     const audioSource = currentAudio[key];
+  //     audioSource.stop();
+  //     audioSource.disconnect();
+  //   }
+  // }
+  // currentAudio = {};
 
   // reset all visibility in codex object
   for (let i = 0; i < codex.length; i++) {
@@ -591,6 +576,45 @@ function revealAll() {
   }
 }
 
+function setupAudio() {
+  audioCompressorNode = AUDIO_CONTEXT.createDynamicsCompressor();
+  audioDistortionNode = AUDIO_CONTEXT.createWaveShaper();
+  audioDistortionGain = AUDIO_CONTEXT.createGain();
+  audioDryChannelGain = AUDIO_CONTEXT.createGain();
+  audioEffectsChannelGain = AUDIO_CONTEXT.createGain();
+  audioMasterGain = AUDIO_CONTEXT.createGain();
+  audioReverbNode = AUDIO_CONTEXT.createConvolver();
+  audioReverseReverbNode = AUDIO_CONTEXT.createConvolver();
+
+  // setup gains and effects 
+  audioCompressorNode.threshold.setValueAtTime(-10, AUDIO_CONTEXT.currentTime);
+  audioCompressorNode.knee.setValueAtTime(50, AUDIO_CONTEXT.currentTime);
+  audioCompressorNode.ratio.setValueAtTime(10, AUDIO_CONTEXT.currentTime);
+  audioCompressorNode.attack.setValueAtTime(0.01, AUDIO_CONTEXT.currentTime);
+  audioCompressorNode.release.setValueAtTime(0.25, AUDIO_CONTEXT.currentTime);
+  audioEffectsChannelGain.gain.setValueAtTime(0, AUDIO_CONTEXT.currentTime);
+  audioDryChannelGain.gain.setValueAtTime(0, AUDIO_CONTEXT.currentTime);
+  audioDryChannelGain.gain.linearRampToValueAtTime(1, AUDIO_CONTEXT.currentTime + 0.2); 
+  audioReverbNode.buffer = impulseResponse(5, 20, false);
+  audioReverseReverbNode.buffer = impulseResponse(.8, 10, true);
+  audioDistortionNode.curve = makeDistortionCurve(100);
+  audioDistortionNode.oversample = '4x';
+  // compensate for increase rms volume
+  audioDistortionGain.gain.setValueAtTime(0, AUDIO_CONTEXT.currentTime); 
+  audioDistortionGain.gain.linearRampToValueAtTime(0.08, AUDIO_CONTEXT.currentTime + 0.2); 
+
+  audioEffectsChannelGain.connect(audioReverbNode);
+  audioEffectsChannelGain.connect(audioReverseReverbNode);
+  audioEffectsChannelGain.connect(audioDistortionNode);
+    audioDistortionNode.connect(audioDistortionGain);
+    audioDistortionGain.connect(audioMasterGain);
+    audioReverbNode.connect(audioMasterGain);
+    audioReverseReverbNode.connect(audioMasterGain);
+  audioDryChannelGain.connect(audioMasterGain);
+  audioMasterGain.connect(audioCompressorNode);
+  audioCompressorNode.connect(AUDIO_CONTEXT.destination);
+}
+
 function showLetter(letter) {
   let shouldPlayAudio = false;
   for (let i = 0; i < codex.length; i++) {
@@ -611,7 +635,7 @@ function showLetter(letter) {
 
   if (shouldPlayAudio) {
     if (currentState === STATE.INTERACTIVE) {
-      playLetterAudio(letter);
+      playLetterAudio(letter, 1, 0);
     } else if (currentState === STATE.AUTO) {
       const normalizedPlaybackRate = normalizeValue(getVerticalDistanceFromCenter(), -1, 1, 0.25, 2);
       const pan = getHorizontalDistanceFromCenter();
@@ -632,7 +656,7 @@ function setCurrentState(state, $element) {
 
 function transition(from, to) {
   if (from === STATE.TITLE) {
-    stopAllFades();
+    stopAllAnimations();
     $redBar.style.width = '0px';
 
     if (to === STATE.INTERACTIVE) {
@@ -640,7 +664,6 @@ function transition(from, to) {
         fadeInElement($codexInstructions, 0);
       }
 
-      fadeGain(1);
       resetCodex();
       lastKeypressTime = new Date().getTime(); // resets timer to auto
       fadeOutElement($screenTitle, 1000, function () {
@@ -654,7 +677,6 @@ function transition(from, to) {
         setCurrentState(STATE.DEBUG, $screenCodex);
       });
     } else if (to === STATE.AUTO) {
-      fadeGain(1);
       resetCodex();
       fadeOutElement($codexInstructions, 0);
       fadeOutElement($screenTitle, 1000, function () {
@@ -676,26 +698,24 @@ function transition(from, to) {
   } else if (from === STATE.INTERACTIVE) {
 
     if (to === STATE.TITLE) {
-      fadeGain(0);
+      fadeVolume(0);
       fadeOutElement($screenCodex, 1000, function () {
         $redBar.style.width =  '100%';
         fadeInElement($screenTitle);
         setCurrentState(STATE.TITLE, $screenTitle);
       });
     } else if (to === STATE.AUTO) {
-      fadeGain(0);
       resetCodex();
       if (+$codexInstructions.style.opacity !== 0) {
         fadeOutElement($codexInstructions);
       }
-      fadeGain(1);
       setCurrentState(STATE.AUTO, $screenCodex);
     }
 
   } else if (from === STATE.AUTO) {
 
     if (to === STATE.TITLE) {
-      fadeGain(0);
+      fadeVolume(0);
       fadeOutElement($screenCodex, 1000, function () {
         $redBar.style.width =  '100%';
         fadeInElement($screenTitle);
@@ -706,7 +726,7 @@ function transition(from, to) {
   }
 }
 
-function stopAllFades () {
+function stopAllAnimations () {
   for (const key in fadeTimeoutMap) {
     if (Object.prototype.hasOwnProperty.call(fadeTimeoutMap, key)) {
       cancelAnimationFrame(fadeTimeoutMap[key]);
