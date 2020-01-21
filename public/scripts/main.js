@@ -147,7 +147,7 @@ function fadeOutElement($element, time, callback) {
 }
 
 function fadeVolume(value) {
-  audioMasterGain.gain.setTargetAtTime(value, AUDIO_CONTEXT.currentTime, 0.01);
+  audioMasterGain.gain.setTargetAtTime(value, AUDIO_CONTEXT.currentTime, 0.1);
 }
 
 function getDelayFadeoutLetterTime() {
@@ -537,22 +537,13 @@ function playLetterAudio(letter, playbackRate, pan) {
 function resetAudio() {
   audioMasterGain.gain.cancelScheduledValues(AUDIO_CONTEXT.currentTime);
   audioMasterGain.gain.setValueAtTime(audioMasterGain.gain.value, AUDIO_CONTEXT.currentTime);
-  audioMasterGain.gain.linearRampToValueAtTime(0, AUDIO_CONTEXT.currentTime + 1);
+  audioMasterGain.gain.linearRampToValueAtTime(0, AUDIO_CONTEXT.currentTime + .5);
   setupAudio();
 }
 
 function resetCodex() {
   // stop and disconnect all playing audio
   resetAudio();
-
-  // for (var key in currentAudio) {
-  //   if (Object.prototype.hasOwnProperty.call(currentAudio, key)) {
-  //     const audioSource = currentAudio[key];
-  //     audioSource.stop();
-  //     audioSource.disconnect();
-  //   }
-  // }
-  // currentAudio = {};
 
   // reset all visibility in codex object
   for (let i = 0; i < codex.length; i++) {
