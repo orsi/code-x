@@ -1,7 +1,7 @@
 {
-  "name": "codex.jonorsi.com",
+  "name": "code-x",
   "version": "1.0.0",
-  "description": "Codex",
+  "description": "Code X",
   "main": "index.js",
   "scripts": {
     "start": "http-server -o",
@@ -11,5 +11,21 @@
   "license": "ISC",
   "devDependencies": {
     "http-server": "^0.12.0"
-  }
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jorsi/codex.git"
+  },
+  "keywords": [
+    "digital",
+    "poetry"
+  ],
+  "bugs": {
+    "url": "https://github.com/jorsi/codex/issues"
+  },
+  "homepage": "https://github.com/jorsi/codex#readme"
 }
