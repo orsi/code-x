@@ -1,5 +1,5 @@
 {
-  "name": "code-x",
+  "name": "@orsi/code-x",
   "version": "1.0.0",
   "description": "Code X",
   "main": "index.js",
