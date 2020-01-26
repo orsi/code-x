@@ -18,14 +18,14 @@
   "dependencies": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jorsi/codex.git"
+    "url": "git+https://github.com/jorsi/code-x.git"
   },
   "keywords": [
     "digital",
     "poetry"
   ],
   "bugs": {
-    "url": "https://github.com/jorsi/codex/issues"
+    "url": "https://github.com/jorsi/code-x/issues"
   },
-  "homepage": "https://github.com/jorsi/codex#readme"
+  "homepage": "https://github.com/jorsi/code-x#readme"
 }
