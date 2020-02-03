@@ -11,6 +11,7 @@ const fileName = isWin ? 'run.bat' : 'run.command';
 const script = isWin ? winScript : nixScript;
 
 // create script
+console.log(`Creating run script for Code X. You can run Code X by double-clicking ${fileName}.`)
 const fs = require('fs');
 fs.writeFileSync(
     fileName, 
