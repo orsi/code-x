@@ -1,6 +1,6 @@
 # [Code X](https://www.wmarksutherland.com/code-x)  
 
-![Code X Revealed](docs/code-x.png?raw=true "Code X")  
+![Code X Revealed](/docs/codex-full.png)
 
 Code X is an interactive exploration of text, image and sound. Interaction is directed from an exploration of the letters on the keyboard, the mouse, and the space bar. 
 
