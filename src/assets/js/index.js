@@ -1,3 +1,11 @@
+import './AudioContextMonkeyPatch.js';
+import { library, dom } from "@fortawesome/fontawesome-svg-core";
+import { faVolumeMute, faVolumeUp } from "@fortawesome/free-solid-svg-icons";
+library.add(faVolumeMute, faVolumeUp);
+dom.watch();
+
+import '../css/styles.scss';
+
 const AUDIO_CONTEXT = new (window.AudioContext || window.webkitAudioContext)();
 const AUDIO_LETTER_BUFFERS = {};
 const FADEOUT_LETTERS_INTERVALS = {};
@@ -5,7 +13,6 @@ const MAX_FADEOUT_LETTER_TIME = 8000;
 const MIN_FADEOUT_LETTER_TIME = 5000;
 const MAX_NEXT_AUTO_UPDATE_TIME = 2000;
 const MIN_NEXT_AUTO_UPDATE_TIME = 1000;
-const RESOURCE_PATH = 'res/';
 const STATE = {
   TITLE: 0,
   INTERACTIVE: 1,
@@ -319,16 +326,13 @@ function initialize() {
 }
 
 function loadAudioFiles() {
-  for (i = 0; i < 26; i++) {
+  for (let i = 0; i < 26; i++) {
     const letter = String.fromCharCode(97 + i);
     AUDIO_LETTER_BUFFERS[letter] = AUDIO_CONTEXT.createBufferSource();
-    let request = new XMLHttpRequest();
-    request.open('GET', `${RESOURCE_PATH}${letter.toUpperCase()}.mp3`, true);
-    request.responseType = 'arraybuffer';
-    request.onreadystatechange = function() {
-      if (request.readyState == XMLHttpRequest.DONE) {
+    import(`../res/${letter.toUpperCase()}.mp3`)
+      .then(function(module) {
         AUDIO_CONTEXT.decodeAudioData(
-          request.response,
+          module.default,
           function (buffer) {
             AUDIO_LETTER_BUFFERS[letter].buffer = buffer;
             AUDIO_LETTER_BUFFERS[letter].loop = false;
@@ -342,9 +346,7 @@ function loadAudioFiles() {
             console.log("Error with decoding audio data" + e.err);
           }
         );
-      }
-    }
-    request.send();
+      });
   }
 }
 
@@ -381,17 +383,11 @@ function onClickVolumeButton(ev) {
   if (isAudioMuted) {
     fadeVolume(1);
     isAudioMuted = false;
-    // change font-awesome icon
-    const $icon = $volumeButton.querySelector('i');
-    $icon.classList.remove('fa-volume-mute');
-    $icon.classList.add('fa-volume-up');
+    $volumeButton.innerHTML = '<i class="fas fa-volume-up"></i>'; // change icon
   } else {
     fadeVolume(0);
     isAudioMuted = true;
-    // change font-awesome icon
-    const $icon = $volumeButton.querySelector('i');
-    $icon.classList.remove('fa-volume-up');
-    $icon.classList.add('fa-volume-mute');
+    $volumeButton.innerHTML = '<i class="fas fa-volume-mute"></i>'; // change icon
   }
 }
 

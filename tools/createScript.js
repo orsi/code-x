@@ -1,8 +1,12 @@
 // Creates a script in the root folder that will
-// launch a terminal/console to run npm start
+// launch a terminal/console to run npm start.
+// Also gives execute privileges to the install
+// scripts.
 const isWin = process.platform === 'win32';
 const nixScript = `#!/bin/bash
 cd \`dirname "$0"\`
+# npm install if no node_modules directory
+[ ! -f "node_modules" ] && npm install
 npm start`;
 const winScript = `dir %~dp0
 npm start
@@ -22,4 +26,4 @@ fs.writeFileSync(
 fs.chmodSync(fileName, 0o775, (err) => {
     if (err) throw err;
     console.log('Set executable.');
-  });
+});
