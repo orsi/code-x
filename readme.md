@@ -11,3 +11,10 @@ Code X is housed within a self-referential paragraph containing every letter of 
 ## Code X Automated Mode
 
 If the computer keyboard is untouched for 10 seconds Code X will begin to operate in random automated-mode. Code X will replicate interactivity producing sound and visual poems until the keyboard is touched and the program returns to the title page. Also, moving the mouse up or down the screen in random automated-mode will change the audio pitch of Code X. Moving the mouse from left to right and right to left will pan the audio signal in automated mode.
+
+## Install & Build
+
+```
+npm install
+npm run build
+```
